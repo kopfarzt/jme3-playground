@@ -1,0 +1,13 @@
+Material BlueMetal : Common/MatDefs/Light/PBRLighting.j3md {
+     MaterialParameters {
+        // ParallaxHeight : 0.1
+        BaseColorMap : "textures/metal/scratchedpaint/metal_0015_color_1k.jpg"
+        MetallicMap : "textures/metal/scratchedpaint/metal_0015_metallic_1k.jpg"
+        RoughnessMap : "textures/metal/scratchedpaint/metal_0015_roughness_1k.jpg"
+        // ParallaxMap : "textures/metal/scratchedpaint/metal_0015_height_1k.png"
+        NormalMap : "textures/metal/scratchedpaint/metal_0015_normal_directx_1k.png"
+        NormalType : -1.0
+        NormalScale : 1
+        // UseSpecularAA : true
+     }
+}
