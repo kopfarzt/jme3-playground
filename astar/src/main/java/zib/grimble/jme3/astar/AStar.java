@@ -1,4 +1,4 @@
-package at.kopfarzt.jmonkeyengine.astar;
+package zib.grimble.jme3.astar;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,9 +33,9 @@ import com.jme3.scene.shape.Box;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 
-import at.kopfarzt.jmonkeyengine.astar.themed.ThemedConnection;
-import at.kopfarzt.jmonkeyengine.astar.themed.ThemedNode;
-import at.kopfarzt.jmonkeyengine.astar.themed.ThemedWorld;
+import zib.grimble.jme3.astar.themed.ThemedConnection;
+import zib.grimble.jme3.astar.themed.ThemedNode;
+import zib.grimble.jme3.astar.themed.ThemedWorld;
 
 public class AStar extends SimpleApplication implements ActionListener {
 	private static final Logger LOG = LoggerFactory.getLogger(AStar.class);
@@ -77,15 +77,7 @@ public class AStar extends SimpleApplication implements ActionListener {
 		DirectionalLight directionalLight = new DirectionalLight(new Vector3f(1f, -1f, -1f), ColorRGBA.White);
 		rootNode.addLight(directionalLight);
 
-		//		spotLight = new SpotLight();
-		//		spotLight.setColor(ColorRGBA.White);
-		//		spotLight.setSpotInnerAngle(15 * FastMath.DEG_TO_RAD);
-		//		spotLight.setSpotOuterAngle(35 * FastMath.DEG_TO_RAD);
-		//		spotLight.setSpotRange(100);
-		//		rootNode.addLight(spotLight);
-
 		addShadowRenderer(directionalLight, 4096, 1);
-		// addShadowFilter(directionalLight, 4096, 1);
 	}
 
 	private void initCamera() {
@@ -228,18 +220,7 @@ public class AStar extends SimpleApplication implements ActionListener {
 	}
 
 	private Node createCamFollower() {
-		//		Cylinder cylinder = new Cylinder(2, 32, 0.3f, 10);
-		//		Geometry geometry = new Geometry("Cylinder", cylinder);
-		//		geometry.setLocalTranslation(0, 0, 5);
-		//		geometry.setMaterial(createShadedMaterial(ColorRGBA.fromRGBA255(0x35, 0x73, 0xc4, 0xff)));
-
-		Box box = new Box(0.3f, 0.1f, 5f);
-		Geometry geometry = new Geometry("Street", box);
-		geometry.setLocalTranslation(0, 0, 5);
-		geometry.setMaterial(createShadedMaterial(ColorRGBA.fromRGBA255(0x40, 0x40, 0x40, 0xff)));
-
 		camFollower = new Node();
-		camFollower.attachChild(geometry);
 
 		return camFollower;
 	}

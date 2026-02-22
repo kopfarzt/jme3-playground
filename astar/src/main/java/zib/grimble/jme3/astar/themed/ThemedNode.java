@@ -1,4 +1,4 @@
-package at.kopfarzt.jmonkeyengine.astar.themed;
+package zib.grimble.jme3.astar.themed;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +12,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.shape.Sphere;
 import com.jme3.scene.shape.Sphere.TextureMode;
 
-import at.kopfarzt.jmonkeyengine.astar.geonodes.GeoNode;
+import zib.grimble.jme3.astar.geonodes.GeoNode;
 
 /**
  * A {@link GeoNode} with a visible representation and a unique name.

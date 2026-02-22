@@ -1,4 +1,4 @@
-package at.kopfarzt.jmonkeyengine.astar.themed;
+package zib.grimble.jme3.astar.themed;
 
 import com.jme3.math.ColorRGBA;
 

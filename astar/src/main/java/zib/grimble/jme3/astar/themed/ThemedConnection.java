@@ -1,11 +1,11 @@
-package at.kopfarzt.jmonkeyengine.astar.themed;
+package zib.grimble.jme3.astar.themed;
 
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.shape.Line;
 
-import at.kopfarzt.jmonkeyengine.astar.geonodes.GeoConnection;
+import zib.grimble.jme3.astar.geonodes.GeoConnection;
 
 public class ThemedConnection extends GeoConnection<ThemedNode> {
 

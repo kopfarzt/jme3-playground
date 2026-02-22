@@ -1,4 +1,4 @@
-package at.kopfarzt.jmonkeyengine.astar;
+package zib.grimble.jme3.astar;
 
 import java.util.Random;
 

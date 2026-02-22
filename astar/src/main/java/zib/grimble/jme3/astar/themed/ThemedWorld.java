@@ -1,4 +1,4 @@
-package at.kopfarzt.jmonkeyengine.astar.themed;
+package zib.grimble.jme3.astar.themed;
 
 import java.util.logging.Logger;
 
@@ -11,7 +11,7 @@ import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Node;
 
-import at.kopfarzt.jmonkeyengine.astar.geonodes.GeoWorld;
+import zib.grimble.jme3.astar.geonodes.GeoWorld;
 
 public class ThemedWorld extends GeoWorld<ThemedNode, ThemedConnection> {
 	private static final Logger LOG = Logger.getLogger(ThemedWorld.class.getName());
