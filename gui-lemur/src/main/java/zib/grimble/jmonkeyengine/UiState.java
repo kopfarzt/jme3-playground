@@ -14,7 +14,6 @@ public class UiState extends BaseAppState {
     @Override
     protected void initialize(Application app) {
         System.out.printf("%s initialize%n", this.getClass());
-        GuiGlobals.initialize(app);
         gui = new Container();
         gui.setLocalTranslation(10, 10, 0);
 

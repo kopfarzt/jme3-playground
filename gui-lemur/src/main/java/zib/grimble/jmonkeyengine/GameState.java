@@ -31,8 +31,8 @@ public class GameState extends BaseAppState {
         System.out.printf("%s onDisable%n", this.getClass());
         if (getApplication() instanceof SimpleApplication sapp) {
             System.out.printf("%s disable fly-by camera%n", this.getClass());
-            sapp.getFlyByCamera().setEnabled(true);
-            sapp.getInputManager().setCursorVisible(false);
+            sapp.getFlyByCamera().setEnabled(false);
+            sapp.getInputManager().setCursorVisible(true);
         }
     }
 }

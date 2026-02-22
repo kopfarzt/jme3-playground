@@ -49,25 +49,26 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-        setDisplayFps(false);
-        setDisplayStatView(false);
-        showSettings();
-        // createGui();
+//        setDisplayFps(false);
+//        setDisplayStatView(false);
+//        showSettings();
+//        // createGui();
         initCamera();
         createLightsAndShadows();
         createGroundPlane();
         createObjects();
+
+        GuiGlobals.initialize(this);
 
         var gameState = new GameState();
         stateManager.attach(gameState);
         var uiState = new UiState();
         stateManager.attach(uiState);
         uiState.setEnabled(false);
-
     }
 
     private void createGui() {
-        GuiGlobals.initialize(this);
+        // GuiGlobals.initialize(this);
         BaseStyles.loadGlassStyle();
         GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
         var container = new Container();
