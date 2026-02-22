@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/astar/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astar/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/gui-lemur/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/gui-lemur/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/nature/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/nature/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/sphere-triangulation/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/sphere-triangulation/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/sphere/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/sphere/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/texture/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/texture/src/main/resources" charset="UTF-8" />
+  </component>
+</project>
