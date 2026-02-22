@@ -8,6 +8,8 @@
     <modules>
         <module>astar</module>
         <module>gui-lemur</module>
+        <module>sphere</module>
+        <module>sphere-triangulation</module>
         <module>texture</module>
     </modules>
 </project>

@@ -38,7 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import zib.grimble.jme3.geometry.ParameterizedSurfaceGrid;
 import zib.grimble.jme3.geometry.psurfaces.SuperSphere;
-import zib.grimble.jme3.iterators.InterpolatingIterator;
+import zib.grimble.jme3.iterators.ExactIterator;
 import zib.grimble.jme3.materials.MaterialFactory;
 import zib.grimble.jme3.service.DebugService;
 
@@ -372,7 +372,7 @@ public class TextureTest extends SimpleApplication implements ActionListener {
 
         if (!single) {
 
-            var colIt = new InterpolatingIterator(0f, 1f, 20);
+            var colIt = new ExactIterator(0f, 1f, 20);
 
             while (colIt.hasNext()) {
                 var col = new ColorRGBA();

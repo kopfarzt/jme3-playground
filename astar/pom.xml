@@ -2,7 +2,6 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>zib.grimble.jmonkeyengine</groupId>
 	<artifactId>astar</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
     <parent>
         <groupId>zib.grimble.jmonkeyengine</groupId>
         <artifactId>jme3-basics</artifactId>
@@ -12,7 +11,6 @@
         <dependency>
             <groupId>zib.grimble.jmonkeyengine</groupId>
             <artifactId>jme3-tools</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
         </dependency>
 	</dependencies>
 </project>

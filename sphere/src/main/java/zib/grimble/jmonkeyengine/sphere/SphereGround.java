@@ -1,4 +1,4 @@
-package at.kopfarzt.jmonkeyengine.sphere;
+package zib.grimble.jmonkeyengine.sphere;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -50,8 +50,7 @@ import com.jme3.terrain.heightmap.HeightMap;
 import com.jme3.terrain.heightmap.HillHeightMap;
 import com.jme3.util.SkyFactory;
 import com.jme3.util.SkyFactory.EnvMapType;
-
-import at.kopfarzt.jmonkeyengine.materials.MaterialFactory;
+import zib.grimble.jme3.materials.MaterialFactory;
 
 public class SphereGround extends SimpleApplication implements ActionListener, PhysicsTickListener {
 	private static final Logger LOG = LoggerFactory.getLogger(SphereGround.class);

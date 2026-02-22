@@ -1,4 +1,4 @@
-package at.kopfarzt.jmonkeyengine.sphere;
+package zib.grimble.jmonkeyengine.sphere;
 
 import com.jme3.audio.AudioNode;
 
