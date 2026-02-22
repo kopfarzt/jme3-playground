@@ -8,6 +8,7 @@
     <modules>
         <module>astar</module>
         <module>gui-lemur</module>
+        <module>minie</module>
         <module>nature</module>
         <module>sphere</module>
         <module>sphere-triangulation</module>
