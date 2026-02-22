@@ -15,17 +15,19 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.system.AppSettings;
+import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
+import com.simsilica.lemur.Label;
 import com.simsilica.lemur.event.DefaultMouseListener;
+import com.simsilica.lemur.event.MouseAppState;
 import com.simsilica.lemur.event.MouseEventControl;
+import com.simsilica.lemur.style.BaseStyles;
 import zib.grimble.jme3.geometry.ParameterizedSurfaceGrid;
 import zib.grimble.jme3.geometry.psurfaces.SuperSphere;
 import zib.grimble.jme3.materials.MaterialFactory;
 
 import java.util.Comparator;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main extends SimpleApplication {
     private static final int WIDTH = 1500;
     private static final int HEIGHT = 900;
@@ -50,23 +52,32 @@ public class Main extends SimpleApplication {
         setDisplayFps(false);
         setDisplayStatView(false);
         showSettings();
-        createGui();
+        // createGui();
         initCamera();
         createLightsAndShadows();
         createGroundPlane();
         createObjects();
+
+        var gameState = new GameState();
+        stateManager.attach(gameState);
+        var uiState = new UiState();
+        stateManager.attach(uiState);
+        uiState.setEnabled(false);
+
     }
 
     private void createGui() {
         GuiGlobals.initialize(this);
-//        BaseStyles.loadGlassStyle();
-//        GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
-//        var container = new Container();
-//        guiNode.attachChild(container);
-//        container.setLocalTranslation(100, 100, 0);
-//        container.addChild(new Label("Hello world."));
+        BaseStyles.loadGlassStyle();
+        GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
+        var container = new Container();
+        guiNode.attachChild(container);
+        container.setLocalTranslation(100, 100, 0);
+        container.addChild(new Label("Hello world."));
+        getStateManager().attach(new MouseAppState(this));
 
-        // getStateManager().attach(new MouseAppState(this));
+        inputManager.setCursorVisible(false);
+        flyCam.setEnabled(true);
     }
 
     private void showSettings() {
@@ -109,9 +120,9 @@ public class Main extends SimpleApplication {
     private Spatial createGroundPlane() {
         Box box = new Box(20, 0.01f, 20);
 
-        Geometry geometry = new Geometry("GroundPlane", box);
+        var geometry = new Geometry("GroundPlane", box);
 
-        geometry.setMaterial(createShadedMaterial(ColorRGBA.fromRGBA255(0xC4, 0x73, 0x35, 0xff)));
+        geometry.setMaterial(MaterialFactory.get(assetManager).createPlastic(ColorRGBA.fromRGBA255(0xC4, 0x73, 0x35, 0xff), 0.0f));
         geometry.setLocalTranslation(0, -0.015f, 0);
 
         geometry.setShadowMode(RenderQueue.ShadowMode.Receive);
@@ -132,23 +143,11 @@ public class Main extends SimpleApplication {
 
         rootNode.attachChild(geometry);
 
-        MouseEventControl.addListenersToSpatial(geometry, new DefaultMouseListener() {
-            @Override
-            protected void click(MouseButtonEvent event, Spatial target, Spatial capture) {
-                System.out.printf("Clicked on %s.%n", target);
-            }
-        });
+//        MouseEventControl.addListenersToSpatial(geometry, new DefaultMouseListener() {
+//            @Override
+//            protected void click(MouseButtonEvent event, Spatial target, Spatial capture) {
+//                System.out.printf("Clicked on %s.%n", target);
+//            }
+//        });
     }
-
-    private Material createShadedMaterial(ColorRGBA color) {
-        Material material = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
-        material.setBoolean("UseMaterialColors", true);
-        material.setColor("Ambient", color);
-        material.setColor("Diffuse", color);
-        material.setColor("Specular", ColorRGBA.White);
-        material.setFloat("Shininess", 64);
-        material.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
-        return material;
-    }
-
 }
