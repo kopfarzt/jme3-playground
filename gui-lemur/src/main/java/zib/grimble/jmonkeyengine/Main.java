@@ -1,6 +1,10 @@
 package zib.grimble.jmonkeyengine;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.input.KeyInput;
+import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.InputListener;
+import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.event.MouseButtonEvent;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
@@ -28,9 +32,12 @@ import zib.grimble.jme3.materials.MaterialFactory;
 
 import java.util.Comparator;
 
-public class Main extends SimpleApplication {
+public class Main extends SimpleApplication implements ActionListener {
     private static final int WIDTH = 1500;
     private static final int HEIGHT = 900;
+    private static final String GUI_TOGGLE = "Gui Toggle";
+    private GameState gameState;
+    private UiState uiState;
 
     public static void main(String[] args) {
         var app = new Main();
@@ -49,106 +56,28 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-//        setDisplayFps(false);
-//        setDisplayStatView(false);
-//        showSettings();
-//        // createGui();
-        initCamera();
-        createLightsAndShadows();
-        createGroundPlane();
-        createObjects();
-
-        GuiGlobals.initialize(this);
-
-        var gameState = new GameState();
+        gameState = new GameState();
         stateManager.attach(gameState);
-        var uiState = new UiState();
+        uiState = new UiState();
         stateManager.attach(uiState);
         uiState.setEnabled(false);
+
+        inputManager.addMapping(GUI_TOGGLE, new KeyTrigger(KeyInput.KEY_TAB));
+        inputManager.addListener(this, GUI_TOGGLE);
     }
 
-    private void createGui() {
-        // GuiGlobals.initialize(this);
-        BaseStyles.loadGlassStyle();
-        GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
-        var container = new Container();
-        guiNode.attachChild(container);
-        container.setLocalTranslation(100, 100, 0);
-        container.addChild(new Label("Hello world."));
-        getStateManager().attach(new MouseAppState(this));
+    @Override
+    public void onAction(String name, boolean isPressed, float tpf) {
+        if (!isPressed) {
+            switch (name) {
+                case GUI_TOGGLE:
+                    gameState.setEnabled(!gameState.isEnabled());
+                    uiState.setEnabled(!uiState.isEnabled());
 
-        inputManager.setCursorVisible(false);
-        flyCam.setEnabled(true);
-    }
-
-    private void showSettings() {
-        System.out.println();
-        System.out.printf("Renderer: %s%n", renderer);
-        System.out.println();
-        System.out.println("App Settings");
-        settings.entrySet().stream().sorted(Comparator.comparing(e -> e.getKey())).forEach(e -> System.out.format("%s: %s%n", e.getKey(), e.getValue()));
-        System.out.println();
-        System.out.format("Java Version: %s&n", Runtime.version());
-        var limits = renderer.getLimits();
-        System.out.println();
-        System.out.println("Renderer Limits");
-        limits.entrySet().stream().sorted(Comparator.comparing(e -> e.getKey())).forEach(e -> System.out.format("%s: %s%n", e.getKey(), e.getValue()));
-    }
-
-    private void initCamera() {
-        flyCam.setZoomSpeed(10);
-        flyCam.setMoveSpeed(6);
-        cam.setLocation(new Vector3f(0, 8, 20));
-        cam.lookAt(new Vector3f(0, 2, 0), Vector3f.UNIT_Y);
-    }
-
-    private void createLightsAndShadows() {
-        var ambientLight = new AmbientLight(ColorRGBA.fromRGBA255(255, 255, 255, 0).mult(1f));
-        rootNode.addLight(ambientLight);
-
-        var directionalLight = new DirectionalLight(new Vector3f(1, -1, -1), ColorRGBA.White);
-        rootNode.addLight(directionalLight);
-
-        addShadowRenderer(directionalLight, 4096, 4);
-    }
-
-    private void addShadowRenderer(DirectionalLight light, int shadowMapSize, int nbSplits) {
-        var shadowRenderer = new DirectionalLightShadowRenderer(assetManager, shadowMapSize, nbSplits);
-        shadowRenderer.setLight(light);
-        viewPort.addProcessor(shadowRenderer);
-    }
-
-    private Spatial createGroundPlane() {
-        Box box = new Box(20, 0.01f, 20);
-
-        var geometry = new Geometry("GroundPlane", box);
-
-        geometry.setMaterial(MaterialFactory.get(assetManager).createPlastic(ColorRGBA.fromRGBA255(0xC4, 0x73, 0x35, 0xff), 0.0f));
-        geometry.setLocalTranslation(0, -0.015f, 0);
-
-        geometry.setShadowMode(RenderQueue.ShadowMode.Receive);
-
-        rootNode.attachChild(geometry);
-
-        return geometry;
-    }
-
-    private void createObjects() {
-        var mesh = new ParameterizedSurfaceGrid(
-                new SuperSphere(1f, 0.6f, 0.6f),
-                null, 50, 25, true, true);
-        var geometry = new Geometry("first", mesh);
-        geometry.setLocalTranslation(new Vector3f(0f, 0f, 0f));
-        geometry.getLocalRotation().fromAngleAxis(90f * FastMath.DEG_TO_RAD, Vector3f.UNIT_X);
-        geometry.setMaterial(MaterialFactory.get(assetManager).createRustyMetal());
-
-        rootNode.attachChild(geometry);
-
-//        MouseEventControl.addListenersToSpatial(geometry, new DefaultMouseListener() {
-//            @Override
-//            protected void click(MouseButtonEvent event, Spatial target, Spatial capture) {
-//                System.out.printf("Clicked on %s.%n", target);
-//            }
-//        });
+                    getFlyByCamera().setEnabled(gameState.isEnabled());
+                    getInputManager().setCursorVisible(uiState.isEnabled());
+                    break;
+            }
+        }
     }
 }
