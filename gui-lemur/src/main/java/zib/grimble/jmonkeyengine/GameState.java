@@ -1,8 +1,10 @@
 package zib.grimble.jmonkeyengine;
 
 import com.jme3.app.Application;
-import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.environment.EnvironmentCamera;
+import com.jme3.environment.FastLightProbeFactory;
+import com.jme3.environment.generation.JobProgressAdapter;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.math.ColorRGBA;
@@ -10,25 +12,35 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
-import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
+import com.jme3.util.SkyFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import zib.grimble.jme3.geometry.ParameterizedSurfaceGrid;
 import zib.grimble.jme3.geometry.psurfaces.SuperSphere;
 import zib.grimble.jme3.materials.MaterialFactory;
 
 public class GameState extends BaseAppState {
+    private static final Logger LOG = LoggerFactory.getLogger(GameState.class);
 
-    private SimpleApplication app;
+    private Main app;
+    private JobProgressAdapter jobProgressListener;
+    private boolean postLightProbeInit;
 
     @Override
     protected void initialize(Application app) {
-        this.app = (SimpleApplication) app;
+        LOG.info("initialize");
+        this.app = (Main) app;
         initCamera();
         createLightsAndShadows();
+        createSkybox();
         createGroundPlane();
-        createObjects();
+        // createObjects();
+        createLightProbe(() -> {
+            postLightProbeInit = true;
+        });
+        this.app.camera(true);
     }
 
     @Override
@@ -37,14 +49,21 @@ public class GameState extends BaseAppState {
 
     @Override
     protected void onEnable() {
+        LOG.info("onEnable");
+        app.camera(true);
     }
 
     @Override
     protected void onDisable() {
+        LOG.info("onDisable");
     }
 
     @Override
     public void update(float tpf) {
+        if (postLightProbeInit) {
+            postLightProbeInit = false;
+            createObjects();
+        }
     }
 
     private void initCamera() {
@@ -88,10 +107,36 @@ public class GameState extends BaseAppState {
                 new SuperSphere(1f, 0.6f, 0.6f),
                 null, 50, 25, true, true);
         var geometry = new Geometry("first", mesh);
-        geometry.setLocalTranslation(new Vector3f(0f, 0f, 0f));
+        geometry.setLocalTranslation(new Vector3f(0f, 1f, 0f));
         geometry.getLocalRotation().fromAngleAxis(90f * FastMath.DEG_TO_RAD, Vector3f.UNIT_X);
-        geometry.setMaterial(MaterialFactory.get(app.getAssetManager()).createRustyMetal());
+        geometry.setMaterial(MaterialFactory.get(app.getAssetManager()).createScratchedAluminiumMetal());
 
+        geometry.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
         app.getRootNode().attachChild(geometry);
     }
+
+    private void createSkybox() {
+        app.getRootNode().attachChild(SkyFactory.createSky(app.getAssetManager(), "textures/sky/kloppenheim_06_puresky.jpg", SkyFactory.EnvMapType.EquirectMap));
+    }
+
+    private void createLightProbe(Runnable runnable) {
+        var environmentCamera = new EnvironmentCamera();
+        app.getStateManager().attach(environmentCamera);
+        environmentCamera.initialize(app.getStateManager(), app);
+        jobProgressListener = new JobProgressAdapter() {
+            @Override
+            public void done(Object result) {
+                runnable.run();
+            }
+        };
+
+        var lightProbe = FastLightProbeFactory.makeProbe(app.getRenderManager(), app.getAssetManager(), 256, Vector3f.ZERO, 1f, 100f, app.getRootNode());
+        jobProgressListener.done(null);
+        // var lightProbe = LightProbeFactory.makeProbe(environmentCamera, rootNode, jobProgressListener);
+        // objects outside of this radius will be black
+        lightProbe.getArea().setRadius(20);
+        lightProbe.setPosition(Vector3f.ZERO);
+        app.getRootNode().addLight(lightProbe);
+    }
+
 }

@@ -3,34 +3,8 @@ package zib.grimble.jmonkeyengine;
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.KeyInput;
 import com.jme3.input.controls.ActionListener;
-import com.jme3.input.controls.InputListener;
 import com.jme3.input.controls.KeyTrigger;
-import com.jme3.input.event.MouseButtonEvent;
-import com.jme3.light.AmbientLight;
-import com.jme3.light.DirectionalLight;
-import com.jme3.material.Material;
-import com.jme3.material.RenderState;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.FastMath;
-import com.jme3.math.Vector3f;
-import com.jme3.renderer.queue.RenderQueue;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.Spatial;
-import com.jme3.scene.shape.Box;
-import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.system.AppSettings;
-import com.simsilica.lemur.Container;
-import com.simsilica.lemur.GuiGlobals;
-import com.simsilica.lemur.Label;
-import com.simsilica.lemur.event.DefaultMouseListener;
-import com.simsilica.lemur.event.MouseAppState;
-import com.simsilica.lemur.event.MouseEventControl;
-import com.simsilica.lemur.style.BaseStyles;
-import zib.grimble.jme3.geometry.ParameterizedSurfaceGrid;
-import zib.grimble.jme3.geometry.psurfaces.SuperSphere;
-import zib.grimble.jme3.materials.MaterialFactory;
-
-import java.util.Comparator;
 
 public class Main extends SimpleApplication implements ActionListener {
     private static final int WIDTH = 1500;
@@ -56,14 +30,16 @@ public class Main extends SimpleApplication implements ActionListener {
 
     @Override
     public void simpleInitApp() {
-        gameState = new GameState();
-        stateManager.attach(gameState);
+        inputManager.addMapping(GUI_TOGGLE, new KeyTrigger(KeyInput.KEY_TAB));
+        inputManager.addListener(this, GUI_TOGGLE);
+
         uiState = new UiState();
         stateManager.attach(uiState);
         uiState.setEnabled(false);
 
-        inputManager.addMapping(GUI_TOGGLE, new KeyTrigger(KeyInput.KEY_TAB));
-        inputManager.addListener(this, GUI_TOGGLE);
+        gameState = new GameState();
+        stateManager.attach(gameState);
+        gameState.setEnabled(true);
     }
 
     @Override
@@ -73,11 +49,13 @@ public class Main extends SimpleApplication implements ActionListener {
                 case GUI_TOGGLE:
                     gameState.setEnabled(!gameState.isEnabled());
                     uiState.setEnabled(!uiState.isEnabled());
-
-                    getFlyByCamera().setEnabled(gameState.isEnabled());
-                    getInputManager().setCursorVisible(uiState.isEnabled());
                     break;
             }
         }
+    }
+
+    public void camera(boolean state) {
+        getFlyByCamera().setEnabled(state);
+        getInputManager().setCursorVisible(!state);
     }
 }
