@@ -13,5 +13,6 @@
         <module>sphere</module>
         <module>sphere-triangulation</module>
         <module>texture</module>
+        <module>simjam</module>
     </modules>
 </project>

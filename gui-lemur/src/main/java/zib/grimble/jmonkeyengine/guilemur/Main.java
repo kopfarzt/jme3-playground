@@ -1,4 +1,4 @@
-package zib.grimble.jmonkeyengine;
+package zib.grimble.jmonkeyengine.guilemur;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.KeyInput;
@@ -40,6 +40,8 @@ public class Main extends SimpleApplication implements ActionListener {
         gameState = new GameState();
         stateManager.attach(gameState);
         gameState.setEnabled(true);
+
+        //flyCam.setDragToRotate(true);
     }
 
     @Override

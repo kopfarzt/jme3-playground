@@ -10,6 +10,7 @@
         <module name="sphere" />
         <module name="nature" />
         <module name="texture" />
+        <module name="simjam" />
         <module name="sphere-triangulation" />
         <module name="astar" />
         <module name="minie" />

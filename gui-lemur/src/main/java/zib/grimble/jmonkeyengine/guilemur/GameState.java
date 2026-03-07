@@ -1,4 +1,4 @@
-package zib.grimble.jmonkeyengine;
+package zib.grimble.jmonkeyengine.guilemur;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
