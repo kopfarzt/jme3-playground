@@ -40,6 +40,7 @@ import zib.grimble.jme3.geometry.ParameterizedSurfaceGrid;
 import zib.grimble.jme3.geometry.psurfaces.SuperSphere;
 import zib.grimble.jme3.iterators.ExactIterator;
 import zib.grimble.jme3.materials.MaterialFactory;
+import zib.grimble.jme3.positioning.Grid;
 import zib.grimble.jme3.service.DebugService;
 
 import java.awt.*;
@@ -76,58 +77,6 @@ public class TextureTest extends SimpleApplication implements ActionListener {
     private Material tangentsMat;
     private JobProgressListener jobProgressListener;
     private long frame = 0;
-
-    private enum KeyAction {
-        TOGGLE_SHADOWS(KeyInput.KEY_F2),
-        TOGGLE_MOUSE(KeyInput.KEY_SPACE),
-        TOGGLE_ROTATE(KeyInput.KEY_R),
-        TOGGLE_NORMALS(KeyInput.KEY_N),
-        TOGGLE_TANGENTS(KeyInput.KEY_T),
-        ROTATE_PLUS(KeyInput.KEY_P),
-        ROTATE_MINUS(KeyInput.KEY_M),
-        ;
-
-        private final int key;
-        private static final Map<Integer, String> KEY_MAP;
-
-        static {
-            KEY_MAP = Arrays.stream(KeyInput.class.getFields())
-                    .filter(f -> f.getType() == int.class)
-                    .collect(Collectors.toMap(f -> {
-                        try {
-                            return f.getInt(null);
-                        } catch (IllegalAccessException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }, Field::getName, (o, n) -> o));
-
-        }
-
-        KeyAction(int key) {
-            this.key = key;
-        }
-
-        ;
-
-        public int getKey() {
-            return key;
-        }
-
-        public String getName() {
-            return KEY_MAP.get(key);
-        }
-
-        public static String getUsage() {
-            var stringWriter = new StringWriter();
-            var writer = new PrintWriter(stringWriter);
-
-            for (var action : values()) {
-                writer.printf("%-14s %s%n", action.getName(), action);
-            }
-
-            return stringWriter.toString();
-        }
-    }
 
     public static void main(String[] args) {
         var app = new TextureTest();
@@ -293,7 +242,9 @@ public class TextureTest extends SimpleApplication implements ActionListener {
 
         float height = 1.5f;
         float half = 7;
-        var grid = new XZGrid("object-%.1f-%.1f", v3(-half, height, -half), v3(half, height, half), 6, 6);
+        // var grid = new XZGrid("object-%.1f-%.1f", v3(-half, height, -half), v3(half, height, half), 6, 6);
+        var grid = Grid.createXZY(v3(-half, height, -half), 4);
+        grid.setLimits(6, 6);
 
         if (!single) {
             addTexturedObject(grid.currentName(), grid.current(), createShadedMaterial(ColorRGBA.Red), STD_ROTATE, true);
@@ -400,7 +351,6 @@ public class TextureTest extends SimpleApplication implements ActionListener {
         LOG.info("Index buffers:");
         LOG.info(DebugService.get().buffersToString(mesh, VertexBuffer.Type.Index));
     }
-
 
     private Material createBlue() {
         var mat = assetManager.loadMaterial("materials/metal-painted-blue-scratched.j3m");
@@ -558,51 +508,6 @@ public class TextureTest extends SimpleApplication implements ActionListener {
         return new Vector3f(x, y, z);
     }
 
-    private static class TexturedObject {
-        private Spatial.CullHint cullHint = Spatial.CullHint.Always;
-        private Spatial spatial;
-        private Vector3f rotate = NO_ROTATE;
-
-        public TexturedObject(Spatial spatial) {
-            this.spatial = spatial;
-        }
-
-        public TexturedObject(Spatial spatial, Vector3f rotate) {
-            this.spatial = spatial;
-            this.rotate = rotate;
-        }
-
-        public boolean isRotating() {
-            return rotate != NO_ROTATE;
-        }
-
-        public void toggleVisbility() {
-            var cullHint = spatial.getCullHint();
-            spatial.setCullHint(this.cullHint);
-            this.cullHint = cullHint;
-        }
-
-        public Spatial getSpatial() {
-            return spatial;
-        }
-
-        public Vector3f getRotate() {
-            return rotate;
-        }
-
-        public void setRotate(Vector3f rotate) {
-            this.rotate = rotate;
-        }
-
-        public boolean rotate() {
-            if (isRotating()) {
-                spatial.rotate(rotate.x, rotate.y, rotate.z);
-                return true;
-            }
-            return false;
-        }
-    }
-
     @Override
     public void simpleUpdate(float tpf) {
         frame++;
@@ -667,5 +572,103 @@ public class TextureTest extends SimpleApplication implements ActionListener {
 
     private void setRotations(Vector3f rotate) {
         rotatingObjects.values().forEach(r -> r.setRotate(rotate));
+    }
+
+    private enum KeyAction {
+        TOGGLE_SHADOWS(KeyInput.KEY_F2),
+        TOGGLE_MOUSE(KeyInput.KEY_SPACE),
+        TOGGLE_ROTATE(KeyInput.KEY_R),
+        TOGGLE_NORMALS(KeyInput.KEY_N),
+        TOGGLE_TANGENTS(KeyInput.KEY_T),
+        ROTATE_PLUS(KeyInput.KEY_P),
+        ROTATE_MINUS(KeyInput.KEY_M),
+        ;
+
+        private static final Map<Integer, String> KEY_MAP;
+
+        static {
+            KEY_MAP = Arrays.stream(KeyInput.class.getFields())
+                    .filter(f -> f.getType() == int.class)
+                    .collect(Collectors.toMap(f -> {
+                        try {
+                            return f.getInt(null);
+                        } catch (IllegalAccessException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }, Field::getName, (o, n) -> o));
+
+        }
+
+        private final int key;
+
+        KeyAction(int key) {
+            this.key = key;
+        }
+
+        ;
+
+        public static String getUsage() {
+            var stringWriter = new StringWriter();
+            var writer = new PrintWriter(stringWriter);
+
+            for (var action : values()) {
+                writer.printf("%-14s %s%n", action.getName(), action);
+            }
+
+            return stringWriter.toString();
+        }
+
+        public int getKey() {
+            return key;
+        }
+
+        public String getName() {
+            return KEY_MAP.get(key);
+        }
+    }
+
+    private static class TexturedObject {
+        private Spatial.CullHint cullHint = Spatial.CullHint.Always;
+        private Spatial spatial;
+        private Vector3f rotate = NO_ROTATE;
+
+        public TexturedObject(Spatial spatial) {
+            this.spatial = spatial;
+        }
+
+        public TexturedObject(Spatial spatial, Vector3f rotate) {
+            this.spatial = spatial;
+            this.rotate = rotate;
+        }
+
+        public boolean isRotating() {
+            return rotate != NO_ROTATE;
+        }
+
+        public void toggleVisbility() {
+            var cullHint = spatial.getCullHint();
+            spatial.setCullHint(this.cullHint);
+            this.cullHint = cullHint;
+        }
+
+        public Spatial getSpatial() {
+            return spatial;
+        }
+
+        public Vector3f getRotate() {
+            return rotate;
+        }
+
+        public void setRotate(Vector3f rotate) {
+            this.rotate = rotate;
+        }
+
+        public boolean rotate() {
+            if (isRotating()) {
+                spatial.rotate(rotate.x, rotate.y, rotate.z);
+                return true;
+            }
+            return false;
+        }
     }
 }

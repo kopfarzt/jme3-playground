@@ -3,7 +3,9 @@ package zib.grimble.jme3;
 import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
+import com.jme3.input.KeyInput;
 import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.KeyTrigger;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
@@ -33,6 +35,8 @@ import org.slf4j.LoggerFactory;
 import zib.grimble.jme3.geometry.ParameterizedSurfaceGrid;
 import zib.grimble.jme3.geometry.psurfaces.*;
 import zib.grimble.jme3.materials.MaterialFactory;
+import zib.grimble.jme3.nodes.CoordinateAxes;
+import zib.grimble.jme3.positioning.Grid;
 import zib.grimble.jme3.service.DebugService;
 
 import java.awt.*;
@@ -42,10 +46,13 @@ import java.util.Map.Entry;
 import java.util.function.Consumer;
 
 public class SurfaceTest extends SimpleApplication implements ActionListener {
-    private static final Logger LOG = LoggerFactory.getLogger(SurfaceTest.class);
     public static final String LIGHTING = "Common/MatDefs/Light/Lighting.j3md";
     public static final String SHOW_NORMALS = "Common/MatDefs/Misc/ShowNormals.j3md";
     public static final String UNSHADED = "Common/MatDefs/Misc/Unshaded.j3md";
+    private static final Logger LOG = LoggerFactory.getLogger(SurfaceTest.class);
+    private Material normalsMat;
+    private Material tangentsMat;
+    private CoordinateAxes coordinateAxes;
 
     public static void main(String[] args) {
         var app = new SurfaceTest();
@@ -54,13 +61,28 @@ public class SurfaceTest extends SimpleApplication implements ActionListener {
         app.start();
     }
 
+    private static AppSettings createSettings() {
+        var appSettings = new AppSettings(true);
+        appSettings.setResolution(1600, 1000);
+        appSettings.setRenderer(AppSettings.LWJGL_OPENGL45);
+        appSettings.setSamples(4);
+        return appSettings;
+    }
+
     @Override
     public void simpleInitApp() {
         initCamera();
-        //		setDisplayFps(false);
+        initKeys();
         setDisplayStatView(false);
         createWorld();
-        rootNode.attachChild(DebugService.get().createCoordinateAxes(assetManager, new Vector3f(5f, 0.0f, 0.0f)));
+    }
+
+    private void initKeys() {
+        LOG.info("Initializing keys");
+        for (var action : KeyAction.values()) {
+            inputManager.addMapping(action.toString(), new KeyTrigger((action.key())));
+            inputManager.addListener(this, action.toString());
+        }
     }
 
     private void initCamera() {
@@ -71,6 +93,9 @@ public class SurfaceTest extends SimpleApplication implements ActionListener {
     }
 
     private void createWorld() {
+        coordinateAxes = DebugService.get().createCoordinateAxes(assetManager, 3f);
+        coordinateAxes.setLocalTranslation(0, 3, 0);
+        rootNode.attachChild(coordinateAxes);
         createObjects();
         createLightsAndShadows();
     }
@@ -78,6 +103,13 @@ public class SurfaceTest extends SimpleApplication implements ActionListener {
     private void createObjects() {
         rootNode.attachChild(createGroundPlane());
 
+        normalsMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        normalsMat.setColor("Color", ColorRGBA.Magenta);
+        normalsMat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+
+        tangentsMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        tangentsMat.setColor("Color", ColorRGBA.Cyan);
+        tangentsMat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 
         //		var chess1 = ColorRGBA.fromRGBA255(0xF7, 0xC5, 0x6E, 0xFF);
         //		var chess2 = ColorRGBA.fromRGBA255(0x89, 0xDC, 0xE0, 0xFF);
@@ -100,6 +132,7 @@ public class SurfaceTest extends SimpleApplication implements ActionListener {
 
 
         earth.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Back);
+        yellowMaterial.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 
 
         var image = new Material(assetManager, LIGHTING);
@@ -109,7 +142,8 @@ public class SurfaceTest extends SimpleApplication implements ActionListener {
 
         float height = 2.5f;
         float half = 12;
-        var grid = new XZGrid("object-%.1f-%.1f", new Vector3f(-half, height, -half), new Vector3f(half, height, half), 4, 4);
+        // var grid = new XZGrid("object-%.1f-%.1f", new Vector3f(-half, height, -half), new Vector3f(half, height, half), 4, 5);
+        var grid = Grid.createXZY(new Vector3f(-half, height, -half), 8);
 
         attachTexturedObject(rootNode, "Mesh Spiral Column",
                 new ParameterizedSurfaceGrid(
@@ -139,8 +173,6 @@ public class SurfaceTest extends SimpleApplication implements ActionListener {
                 yellowMaterial, font
         );
 
-
-        // new line
         grid.next();
 
         attachTexturedObject(rootNode, "Interpolated Mesh Spiral",
@@ -153,8 +185,7 @@ public class SurfaceTest extends SimpleApplication implements ActionListener {
                 yellowMaterial, font
         );
 
-
-        grid.next();
+        grid.nextLine();
 
         var sphere = new Sphere(32, 32, 2);
         attachTexturedObject(rootNode, "Sphere", sphere, grid.current(), chessboard, font);
@@ -180,7 +211,7 @@ public class SurfaceTest extends SimpleApplication implements ActionListener {
         );
 
 
-        grid.nextLine();
+        grid.next();
 
         attachTexturedObject(rootNode, "Sphere", sphere, grid.current(), earth, font);
 //        attachTexturedObject(rootNode, null,
@@ -189,7 +220,7 @@ public class SurfaceTest extends SimpleApplication implements ActionListener {
 //                unshaded, font
 //        );
 
-        grid.next();
+        grid.nextLine();
 
         var meshSphere = new ParameterizedSurfaceGrid(
                 new MeshSphere(2),
@@ -213,7 +244,7 @@ public class SurfaceTest extends SimpleApplication implements ActionListener {
         attachTexturedObject(rootNode, "Quad",
                 new Quad(4, 4),
                 grid.current(),
-                image, font
+                yellowMaterial, font
         );
 
         grid.nextLine();
@@ -256,6 +287,35 @@ public class SurfaceTest extends SimpleApplication implements ActionListener {
                 yellowMaterial, font
         );
 
+        grid.nextLine();
+
+        attachTexturedObject(rootNode, "Circular Band",
+                new ParameterizedSurfaceGrid(
+                        new CircularBand(0.5f, 1f),
+                        null, 50, 3, false, false),
+                grid.current(),
+                yellowMaterial, font
+        );
+
+        grid.next();
+
+        attachTexturedObject(rootNode, "Torus",
+                new ParameterizedSurfaceGrid(
+                        new Torus(0.5f, 1f),
+                        null, 50, 25, true, true),
+                grid.current(),
+                yellowMaterial, font
+        );
+
+        grid.next();
+
+        attachTexturedObject(rootNode, "Super Torus",
+                new ParameterizedSurfaceGrid(
+                        new SuperTorus(0.5f, 1f, 0.5f, 0.5f),
+                        null, 50, 25, true, true),
+                grid.current(),
+                yellowMaterial, font
+        );
         rootNode.setShadowMode(ShadowMode.CastAndReceive);
     }
 
@@ -270,14 +330,6 @@ public class SurfaceTest extends SimpleApplication implements ActionListener {
         geometry.setLocalTranslation(0, -0.015f, 0);
 
         return geometry;
-    }
-
-    private static AppSettings createSettings() {
-        var appSettings = new AppSettings(true);
-        appSettings.setResolution(1600, 1000);
-        appSettings.setRenderer(AppSettings.LWJGL_OPENGL45);
-        appSettings.setSamples(4);
-        return appSettings;
     }
 
     private Spatial attachTexturedObject(Node rootNode, String name, Mesh mesh, Vector3f pos, Material material, BitmapFont font) {
@@ -415,6 +467,51 @@ public class SurfaceTest extends SimpleApplication implements ActionListener {
         viewPort.addProcessor(fpp);
     }
 
+    @Override
+    public void simpleUpdate(float tpf) {
+    }
+
+    @Override
+    public void simpleRender(RenderManager rm) {
+    }
+
+    @Override
+    public void onAction(String name, boolean isPressed, float tpf) {
+        var action = KeyAction.valueOf(name);
+        LOG.info("Key Action: {} Pressed: {}", name, isPressed);
+        if (isPressed) {
+            switch (action) {
+                case TOGGLE_COORD_SYSTEM:
+                    LOG.info("Toggling visibiliy of coordinate axes: {}", coordinateAxes);
+                    coordinateAxes.toggleVisibility();
+                    LOG.info("Coordinate axes: {}", coordinateAxes);
+                    break;
+                case TOGGLE_NORMALS:
+//                    normalObjects.values().forEach(TextureTest.TexturedObject::toggleVisbility);
+                    break;
+                case TOGGLE_TANGENTS:
+//                    tangentObjects.values().forEach(TextureTest.TexturedObject::toggleVisbility);
+                    break;
+            }
+        }
+    }
+
+    private enum KeyAction {
+        TOGGLE_COORD_SYSTEM(KeyInput.KEY_C),
+        TOGGLE_NORMALS(KeyInput.KEY_N),
+        TOGGLE_TANGENTS(KeyInput.KEY_T),
+        ;
+
+        private final int key;
+
+        KeyAction(int key) {
+            this.key = key;
+        }
+
+        public int key() {
+            return key;
+        }
+    }
 
     public class Waves extends ParameterizedSurface {
 
@@ -433,17 +530,5 @@ public class SurfaceTest extends SimpleApplication implements ActionListener {
             vector.y = -2 / (d + FastMath.PI) * FastMath.sin(2 * d);
             return vector;
         }
-    }
-
-    @Override
-    public void simpleUpdate(float tpf) {
-    }
-
-    @Override
-    public void simpleRender(RenderManager rm) {
-    }
-
-    @Override
-    public void onAction(String name, boolean isPressed, float tpf) {
     }
 }

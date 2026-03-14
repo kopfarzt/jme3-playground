@@ -80,12 +80,13 @@ public class GameState extends BaseAppState {
         var directionalLight = new DirectionalLight(new Vector3f(1, -1, -1), ColorRGBA.White);
         app.getRootNode().addLight(directionalLight);
 
-        addShadowRenderer(directionalLight, 4096, 4);
+        addShadowRenderer(directionalLight, 1024, 4);
     }
 
     private void addShadowRenderer(DirectionalLight light, int shadowMapSize, int nbSplits) {
         var shadowRenderer = new DirectionalLightShadowRenderer(app.getAssetManager(), shadowMapSize, nbSplits);
         shadowRenderer.setLight(light);
+
         app.getViewPort().addProcessor(shadowRenderer);
     }
 

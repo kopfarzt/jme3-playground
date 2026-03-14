@@ -22,8 +22,8 @@ public class Main extends SimpleApplication implements ActionListener {
         settings.setRenderer(AppSettings.LWJGL_OPENGL45);
         settings.setGammaCorrection(true);
 //        appSettings.setRenderer(AppSettings.LWJGL_OPENGL2); // to test Compatibility profile
-        settings.setRenderer(AppSettings.LWJGL_OPENGL32); // to test Core 3.2 profile
-        settings.setRenderer(AppSettings.LWJGL_OPENGL2);
+        // settings.setRenderer(AppSettings.LWJGL_OPENGL32); // to test Core 3.2 profile
+        // settings.setRenderer(AppSettings.LWJGL_OPENGL2);
         app.setSettings(settings);
         app.start();
     }
