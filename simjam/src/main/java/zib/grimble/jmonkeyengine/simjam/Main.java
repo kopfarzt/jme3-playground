@@ -15,7 +15,6 @@ public class Main extends SimpleApplication implements ActionListener {
 
     public static void main(String[] args) {
         var app = new Main();
-        app.setShowSettings(false);
         var settings = new AppSettings(true);
         settings.setSamples(4);
         settings.setResolution(WIDTH, HEIGHT);
@@ -25,6 +24,7 @@ public class Main extends SimpleApplication implements ActionListener {
         // settings.setRenderer(AppSettings.LWJGL_OPENGL32); // to test Core 3.2 profile
         // settings.setRenderer(AppSettings.LWJGL_OPENGL2);
         app.setSettings(settings);
+        app.setShowSettings(false);
         app.start();
     }
 

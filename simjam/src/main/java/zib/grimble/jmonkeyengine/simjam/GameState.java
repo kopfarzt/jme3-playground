@@ -18,7 +18,7 @@ import com.jme3.util.SkyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import zib.grimble.jme3.geometry.ParameterizedSurfaceGrid;
-import zib.grimble.jme3.geometry.psurfaces.SuperSphere;
+import zib.grimble.jme3.geometry.psurfaces.CircularBand;
 import zib.grimble.jme3.materials.MaterialFactory;
 
 public class GameState extends BaseAppState {
@@ -36,7 +36,7 @@ public class GameState extends BaseAppState {
         createLightsAndShadows();
         createSkybox();
         createGroundPlane();
-        // createObjects();
+        createStreet();
         createLightProbe(() -> {
             postLightProbeInit = true;
         });
@@ -91,7 +91,7 @@ public class GameState extends BaseAppState {
     }
 
     private void createGroundPlane() {
-        Box box = new Box(20, 0.01f, 20);
+        var box = new Box(20, 0.01f, 20);
 
         var geometry = new Geometry("GroundPlane", box);
 
@@ -103,17 +103,23 @@ public class GameState extends BaseAppState {
         app.getRootNode().attachChild(geometry);
     }
 
-    private void createObjects() {
-        var mesh = new ParameterizedSurfaceGrid(
-                new SuperSphere(1f, 0.6f, 0.6f),
-                null, 50, 25, true, true);
-        var geometry = new Geometry("first", mesh);
-        geometry.setLocalTranslation(new Vector3f(0f, 1f, 0f));
-        geometry.getLocalRotation().fromAngleAxis(90f * FastMath.DEG_TO_RAD, Vector3f.UNIT_X);
-        geometry.setMaterial(MaterialFactory.get(app.getAssetManager()).createScratchedAluminiumMetal());
+    private void createStreet() {
+        var street = new ParameterizedSurfaceGrid(
+                new CircularBand(9f, 10f),
+                null, 50, 3, true, false);
+        var geometry = new Geometry("Street", street);
+
+        var streetMaterial = MaterialFactory.get(app.getAssetManager()).createPlastic(ColorRGBA.fromRGBA255(0xC4, 0, 0, 0xff), 0.0f);
+        //streetMaterial.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
+        geometry.setMaterial(streetMaterial);
+        geometry.getLocalRotation().fromAngleAxis(-90f * FastMath.DEG_TO_RAD, Vector3f.UNIT_X);
 
         geometry.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+
         app.getRootNode().attachChild(geometry);
+    }
+
+    private void createObjects() {
     }
 
     private void createSkybox() {
