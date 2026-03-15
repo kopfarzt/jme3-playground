@@ -12,6 +12,7 @@
         <module>nature</module>
         <module>sphere</module>
         <module>sphere-triangulation</module>
+        <module>surface</module>
         <module>texture</module>
         <module>simjam</module>
     </modules>

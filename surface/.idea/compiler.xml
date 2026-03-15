@@ -6,15 +6,10 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="gui-lemur" />
-        <module name="surface" />
-        <module name="sphere" />
-        <module name="nature" />
-        <module name="texture" />
-        <module name="simjam" />
         <module name="sphere-triangulation" />
-        <module name="astar" />
-        <module name="minie" />
+        <module name="jme3-tools" />
+        <module name="texture" />
+        <module name="jme3-materials" />
       </profile>
     </annotationProcessing>
   </component>

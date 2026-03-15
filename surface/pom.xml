@@ -1,7 +1,7 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>texture</artifactId>
+    <artifactId>surface</artifactId>
     <parent>
         <groupId>zib.grimble.jmonkeyengine</groupId>
         <artifactId>jme3-basics</artifactId>
@@ -27,7 +27,7 @@
                         <artifactId>maven-assembly-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>create-jar-for-texture-test</id>
+                                <id>create-jar-for-surface-test</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>single</goal>
@@ -35,13 +35,13 @@
                                 <configuration>
                                     <archive>
                                         <manifest>
-                                            <mainClass>zib.grimble.jme3.texture.TextureTest</mainClass>
+                                            <mainClass>zib.grimble.jme3.texture.SurfaceTest</mainClass>
                                         </manifest>
                                     </archive>
                                     <descriptorRefs>
                                         <descriptorRef>jar-with-dependencies</descriptorRef>
                                     </descriptorRefs>
-                                    <finalName>texture-test</finalName>
+                                    <finalName>surface-test</finalName>
                                     <appendAssemblyId>false</appendAssemblyId>
                                 </configuration>
                             </execution>
