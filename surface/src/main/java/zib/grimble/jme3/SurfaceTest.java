@@ -241,11 +241,14 @@ public class SurfaceTest extends SimpleApplication implements ActionListener {
         grid.next();
 
 
+        var quad = new Quad(4, 4);
         attachTexturedObject(rootNode, "Quad",
-                new Quad(4, 4),
+                quad,
                 grid.current(),
                 yellowMaterial, font
         );
+
+        // LOG.info("Quad Pos: {}", DebugService.get().buffersToString(quad));
 
         grid.nextLine();
 
@@ -289,10 +292,12 @@ public class SurfaceTest extends SimpleApplication implements ActionListener {
 
         grid.nextLine();
 
+        var circularBand = new ParameterizedSurfaceGrid(
+                new CircularBand(0.5f, 1f),
+                null, 50, 3, true, false);
+        //LOG.info("Circular Band Pos: {}", DebugService.get().buffersToString(circularBand));
         attachTexturedObject(rootNode, "Circular Band",
-                new ParameterizedSurfaceGrid(
-                        new CircularBand(0.5f, 1f),
-                        null, 50, 3, false, false),
+                circularBand,
                 grid.current(),
                 yellowMaterial, font
         );
