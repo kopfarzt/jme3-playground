@@ -1,0 +1,6 @@
+Material Street : Common/MatDefs/Light/Lighting.j3md {
+     MaterialParameters {
+        Specular : 1.0 1.0 1.0 1.0
+        DiffuseMap : Repeat materials/street.png
+     }
+}

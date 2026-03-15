@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import zib.grimble.jme3.geometry.ParameterizedSurfaceGrid;
 import zib.grimble.jme3.geometry.psurfaces.CircularBand;
 import zib.grimble.jme3.materials.MaterialFactory;
+import zib.grimble.jme3.service.DebugService;
+import zib.grimble.jme3.types.ScalingUVMap;
 
 public class GameState extends BaseAppState {
     private static final Logger LOG = LoggerFactory.getLogger(GameState.class);
@@ -106,10 +108,17 @@ public class GameState extends BaseAppState {
     private void createStreet() {
         var street = new ParameterizedSurfaceGrid(
                 new CircularBand(9f, 10f),
-                null, 50, 3, true, false);
+                new ScalingUVMap(20f, 1f),
+                100, 3,
+                true, false);
+
+        LOG.info("Street: {}", DebugService.get().buffersToString(street));
+
+
         var geometry = new Geometry("Street", street);
 
-        var streetMaterial = MaterialFactory.get(app.getAssetManager()).createPlastic(ColorRGBA.fromRGBA255(0xC4, 0, 0, 0xff), 0.0f);
+        // var streetMaterial = MaterialFactory.get(app.getAssetManager()).createPlastic(ColorRGBA.fromRGBA255(0xC4, 0xC4, 0xC4, 0xff), 0.0f);
+        var streetMaterial = app.getAssetManager().loadMaterial("materials/street.j3m");
         //streetMaterial.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
         geometry.setMaterial(streetMaterial);
         geometry.getLocalRotation().fromAngleAxis(-90f * FastMath.DEG_TO_RAD, Vector3f.UNIT_X);
