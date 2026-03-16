@@ -131,16 +131,26 @@ public class GameState extends BaseAppState {
     private void createObjects() {
         var hatchback = app.getAssetManager().loadModel("Kennel/hatchback-sports.glb");
         hatchback.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+        hatchback.setLocalScale(0.25f);
+        hatchback.addControl(new VehicleControl(9.75f, 0, 10));
         app.getRootNode().attachChild(hatchback);
 
+        var hb2 = hatchback.clone();
+        hb2.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+        hb2.setLocalScale(0.25f);
+        hb2.addControl(new VehicleControl(9.75f, 30, 10));
+        app.getRootNode().attachChild(hb2);
+
         var taxi = app.getAssetManager().loadModel("Kennel/taxi.glb");
-        taxi.setLocalTranslation(2, 0, 0);
         taxi.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+        taxi.setLocalScale(0.25f);
+        taxi.addControl(new VehicleControl(9.75f, 90, 10));
         app.getRootNode().attachChild(taxi);
 
         var sedan = app.getAssetManager().loadModel("Kennel/sedan.glb");
-        sedan.setLocalTranslation(4, 0, 0);
         sedan.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+        sedan.setLocalScale(0.25f);
+        sedan.addControl(new VehicleControl(9.75f, 180, 10));
         app.getRootNode().attachChild(sedan);
 
         sedan.depthFirstTraversal(spatial -> {
