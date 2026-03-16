@@ -129,6 +129,32 @@ public class GameState extends BaseAppState {
     }
 
     private void createObjects() {
+        var hatchback = app.getAssetManager().loadModel("Kennel/hatchback-sports.glb");
+        hatchback.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+        app.getRootNode().attachChild(hatchback);
+
+        var taxi = app.getAssetManager().loadModel("Kennel/taxi.glb");
+        taxi.setLocalTranslation(2, 0, 0);
+        taxi.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+        app.getRootNode().attachChild(taxi);
+
+        var sedan = app.getAssetManager().loadModel("Kennel/sedan.glb");
+        sedan.setLocalTranslation(4, 0, 0);
+        sedan.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+        app.getRootNode().attachChild(sedan);
+
+        sedan.depthFirstTraversal(spatial -> {
+            if (spatial instanceof Geometry geo) {
+                var name = geo.getName();
+                LOG.info("Geometry: {} {}", name, geo.getMaterial().getParams());
+                if (name.equals("body_0")) {
+                    LOG.info("Changing material");
+                    geo.getMaterial().setFloat("Roughness", 0);
+                }
+                LOG.info("Geometry: {} {}", name, geo.getMaterial().getParams());
+            }
+        });
+
     }
 
     private void createSkybox() {
