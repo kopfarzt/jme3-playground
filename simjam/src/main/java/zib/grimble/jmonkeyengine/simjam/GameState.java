@@ -12,6 +12,7 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.util.SkyFactory;
@@ -23,12 +24,41 @@ import zib.grimble.jme3.materials.MaterialFactory;
 import zib.grimble.jme3.service.DebugService;
 import zib.grimble.jme3.types.ScalingUVMap;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
 public class GameState extends BaseAppState {
     private static final Logger LOG = LoggerFactory.getLogger(GameState.class);
-
+    private static final List<String> CAR_MODELS = List.of(
+            "Kennel/ambulance.glb",
+            "Kennel/ambulance.glb",
+            "Kennel/delivery-flat.glb",
+            "Kennel/delivery.glb",
+            "Kennel/firetruck.glb",
+            "Kennel/garbage-truck.glb",
+            "Kennel/hatchback-sports.glb",
+            "Kennel/police.glb",
+            "Kennel/race-future.glb",
+            "Kennel/race.glb",
+            "Kennel/sedan-sports.glb",
+            "Kennel/sedan.glb",
+            "Kennel/suv-luxury.glb",
+            "Kennel/suv.glb",
+            "Kennel/taxi.glb",
+            "Kennel/tractor-police.glb",
+            "Kennel/tractor-shovel.glb",
+            "Kennel/tractor.glb",
+            "Kennel/truck-flat.glb",
+            "Kennel/truck.glb",
+            "Kennel/van.glb"
+    );
+    private static final Random RAND = new Random();
     private Main app;
     private JobProgressAdapter jobProgressListener;
     private boolean postLightProbeInit;
+    private Map<String, Spatial> vehicleMap = new HashMap<>();
 
     @Override
     protected void initialize(Application app) {
@@ -79,7 +109,7 @@ public class GameState extends BaseAppState {
         var ambientLight = new AmbientLight(ColorRGBA.fromRGBA255(255, 255, 255, 0).mult(1f));
         app.getRootNode().addLight(ambientLight);
 
-        var directionalLight = new DirectionalLight(new Vector3f(1, -1, -1), ColorRGBA.White);
+        var directionalLight = new DirectionalLight(new Vector3f(1, -0.5f, 0.5f), ColorRGBA.White);
         app.getRootNode().addLight(directionalLight);
 
         addShadowRenderer(directionalLight, 1024, 4);
@@ -128,43 +158,42 @@ public class GameState extends BaseAppState {
         app.getRootNode().attachChild(geometry);
     }
 
-    private void createObjects() {
-        var hatchback = app.getAssetManager().loadModel("Kennel/hatchback-sports.glb");
-        hatchback.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
-        hatchback.setLocalScale(0.25f);
-        hatchback.addControl(new VehicleControl(9.75f, 0, 10));
-        app.getRootNode().attachChild(hatchback);
+    private Spatial createVehicle(String model, float scale, float radius, float start, float speed) {
+        var spatial = vehicleMap.get(model);
 
-        var hb2 = hatchback.clone();
-        hb2.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
-        hb2.setLocalScale(0.25f);
-        hb2.addControl(new VehicleControl(9.75f, 30, 10));
-        app.getRootNode().attachChild(hb2);
-
-        var taxi = app.getAssetManager().loadModel("Kennel/taxi.glb");
-        taxi.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
-        taxi.setLocalScale(0.25f);
-        taxi.addControl(new VehicleControl(9.75f, 90, 10));
-        app.getRootNode().attachChild(taxi);
-
-        var sedan = app.getAssetManager().loadModel("Kennel/sedan.glb");
-        sedan.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
-        sedan.setLocalScale(0.25f);
-        sedan.addControl(new VehicleControl(9.75f, 180, 10));
-        app.getRootNode().attachChild(sedan);
-
-        sedan.depthFirstTraversal(spatial -> {
-            if (spatial instanceof Geometry geo) {
-                var name = geo.getName();
-                LOG.info("Geometry: {} {}", name, geo.getMaterial().getParams());
-                if (name.equals("body_0")) {
-                    LOG.info("Changing material");
-                    geo.getMaterial().setFloat("Roughness", 0);
+        if (spatial == null) {
+            spatial = app.getAssetManager().loadModel(model);
+            spatial.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+            spatial.setLocalScale(scale);
+            spatial.depthFirstTraversal(s -> {
+                if (s instanceof Geometry geo) {
+                    var name = geo.getName();
+                    LOG.info("Geometry: {} {}", name, geo.getMaterial().getParams());
+                    if (name.equals("body_0")) {
+                        LOG.info("Changing material");
+                        geo.getMaterial().setFloat("Roughness", 0);
+                    }
+                    LOG.info("Geometry: {} {}", name, geo.getMaterial().getParams());
                 }
-                LOG.info("Geometry: {} {}", name, geo.getMaterial().getParams());
-            }
-        });
+            });
+            vehicleMap.put(model, spatial);
+        } else {
+            spatial = spatial.clone();
+        }
 
+        spatial.addControl(new VehicleControl(radius, start, speed));
+        return spatial;
+    }
+
+    private Spatial createRandomVehicle(float start, float speed) {
+        var model = CAR_MODELS.get(RAND.nextInt(CAR_MODELS.size()));
+        return createVehicle(model, 0.25f, 9.75f, start, speed);
+    }
+
+    private void createObjects() {
+        for (float start = 0; start < 360; start += 20) {
+            app.getRootNode().attachChild(createRandomVehicle(start, 10));
+        }
     }
 
     private void createSkybox() {
