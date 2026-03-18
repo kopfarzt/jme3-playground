@@ -100,7 +100,7 @@ public class GameState extends BaseAppState {
 
     private void initCamera() {
         app.getFlyByCamera().setZoomSpeed(10);
-        app.getFlyByCamera().setMoveSpeed(6);
+        app.getFlyByCamera().setMoveSpeed(2);
         app.getCamera().setLocation(new Vector3f(0, 8, 20));
         app.getCamera().lookAt(new Vector3f(0, 2, 0), Vector3f.UNIT_Y);
     }
@@ -127,7 +127,7 @@ public class GameState extends BaseAppState {
 
         var geometry = new Geometry("GroundPlane", box);
 
-        geometry.setMaterial(MaterialFactory.get(app.getAssetManager()).createPlastic(ColorRGBA.fromRGBA255(0xC4, 0x73, 0x35, 0xff), 0.0f));
+        geometry.setMaterial(MaterialFactory.get(app.getAssetManager()).createPlastic(ColorRGBA.fromRGBA255(0xC4, 0x73, 0x35, 0xff), 1.0f));
         geometry.setLocalTranslation(0, -0.015f, 0);
 
         geometry.setShadowMode(RenderQueue.ShadowMode.Receive);
@@ -158,7 +158,7 @@ public class GameState extends BaseAppState {
         app.getRootNode().attachChild(geometry);
     }
 
-    private Spatial createVehicle(String model, float scale, float radius, float start, float speed) {
+    private Spatial createVehicle(String model, float scale) {
         var spatial = vehicleMap.get(model);
 
         if (spatial == null) {
@@ -181,19 +181,31 @@ public class GameState extends BaseAppState {
             spatial = spatial.clone();
         }
 
-        spatial.addControl(new VehicleControl(radius, start, speed));
         return spatial;
     }
 
-    private Spatial createRandomVehicle(float start, float speed) {
+    private Spatial createRandomVehicle() {
         var model = CAR_MODELS.get(RAND.nextInt(CAR_MODELS.size()));
-        return createVehicle(model, 0.25f, 9.75f, start, speed);
+        return createVehicle(model, 0.2f);
     }
 
     private void createObjects() {
-        for (float start = 0; start < 360; start += 20) {
-            app.getRootNode().attachChild(createRandomVehicle(start, 10));
+        VehicleControl first = null;
+        VehicleControl last = null;
+        for (float start = 0; start < 360; start += 120) {
+            var vehicle = createRandomVehicle();
+            var control = new VehicleControl(9.75f, start, 0);
+            if (first == null) {
+                first = control;
+                last = control;
+            } else {
+                control.setPredecessor(last);
+                last = control;
+            }
+            vehicle.addControl(control);
+            app.getRootNode().attachChild(vehicle);
         }
+        first.setPredecessor(last);
     }
 
     private void createSkybox() {

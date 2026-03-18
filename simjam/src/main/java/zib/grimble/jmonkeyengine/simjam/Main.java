@@ -25,6 +25,8 @@ public class Main extends SimpleApplication implements ActionListener {
         // settings.setRenderer(AppSettings.LWJGL_OPENGL2);
         app.setSettings(settings);
         app.setShowSettings(false);
+        app.setDisplayStatView(false);
+        app.setDisplayFps(false);
         app.start();
     }
 
