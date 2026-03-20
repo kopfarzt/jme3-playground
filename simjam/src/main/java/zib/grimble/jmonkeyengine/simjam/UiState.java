@@ -2,6 +2,7 @@ package zib.grimble.jmonkeyengine.simjam;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
@@ -28,33 +29,47 @@ public class UiState extends BaseAppState {
         BaseStyles.loadGlassStyle();
         GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
 
-        var mainMenu = new Container();
+        var mainPanel = new Container();
 
-        var title = mainMenu.addChild(new Label("Mein Spiel"));
+        int screenWidth = app.getCamera().getWidth();
+        int screenHeight = app.getCamera().getHeight();
+
+        int panelWidth = screenWidth / 3;
+        int panelHeight = screenHeight;
+
+        mainPanel.setPreferredSize(new Vector3f(panelWidth, panelHeight, 0));
+
+        mainPanel.setLocalTranslation(
+                screenWidth - panelWidth,
+                screenHeight,
+                1
+        );
+
+        var title = mainPanel.addChild(new Label("Mein Spiel"));
         title.setFontSize(32);
 
-        var startButton = mainMenu.addChild(new Button("Spiel starten"));
+        var startButton = mainPanel.addChild(new Button("Spiel starten"));
         startButton.addClickCommands(source -> {
             setEnabled(false);
             getStateManager().getState(GameState.class).setEnabled(true);
         });
 
-        var dummyButton = mainMenu.addChild(new Button("Dummy"));
+        var dummyButton = mainPanel.addChild(new Button("Dummy"));
         dummyButton.addClickCommands(source -> {
             LOG.info("Dummy Button");
         });
 
-        var quitButton = mainMenu.addChild(new Button("Beenden"));
+        var quitButton = mainPanel.addChild(new Button("Beenden"));
         quitButton.addClickCommands(source -> app.stop());
 
         // Position setzen
-        mainMenu.setLocalTranslation(
+        mainPanel.setLocalTranslation(
                 app.getCamera().getWidth() / 2f - 100,
                 app.getCamera().getHeight() / 2f + 100,
                 0
         );
 
-        return mainMenu;
+        return mainPanel;
     }
 
     @Override

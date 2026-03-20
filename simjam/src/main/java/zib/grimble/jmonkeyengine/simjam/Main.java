@@ -32,7 +32,8 @@ public class Main extends SimpleApplication implements ActionListener {
 
     @Override
     public void simpleInitApp() {
-        inputManager.addMapping(GUI_TOGGLE, new KeyTrigger(KeyInput.KEY_TAB));
+        inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
+        inputManager.addMapping(GUI_TOGGLE, new KeyTrigger(KeyInput.KEY_ESCAPE));
         inputManager.addListener(this, GUI_TOGGLE);
 
         uiState = new UiState();
