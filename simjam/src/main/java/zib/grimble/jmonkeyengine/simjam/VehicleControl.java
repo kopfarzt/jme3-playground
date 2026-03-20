@@ -5,6 +5,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.control.AbstractControl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,8 @@ import org.slf4j.LoggerFactory;
 public class VehicleControl extends AbstractControl {
     private static final Logger LOG = LoggerFactory.getLogger(GameState.class);
     private final float radius;
+    private final float LEN_TO_RAD = FastMath.DEG_TO_RAD * 0.5f;
+    private final float RAD_TO_LEN = 1.0f / LEN_TO_RAD;
     private float cur = 0;
     private float speed = 0;
     private float maxAcc = 2;
@@ -20,8 +23,7 @@ public class VehicleControl extends AbstractControl {
     private Vector3f pos = new Vector3f();
     private Quaternion rotation = new Quaternion();
     private VehicleControl predecessor;
-    private float LEN_TO_RAD = FastMath.DEG_TO_RAD * 0.5f;
-    private float RAD_TO_LEN = 1.0f / LEN_TO_RAD;
+    private Spatial marker;
 
     public VehicleControl(float radius, float start, float speed) {
         this.radius = radius;
@@ -37,29 +39,43 @@ public class VehicleControl extends AbstractControl {
             cur -= FastMath.TWO_PI;
         }
         pos.set(radius * FastMath.cos(-cur), spatial.getLocalTranslation().y, radius * FastMath.sin(-cur));
+        if (marker != null) {
+            marker.setLocalTranslation(pos.x, pos.y + 1, pos.z);
+        }
         spatial.setLocalTranslation(pos);
         spatial.setLocalRotation(rotation.fromAngleAxis(cur + FastMath.PI, Vector3f.UNIT_Y));
         //LOG.info("speed: %.2f tpf: %.2f cur: %.2f".formatted(speed, tpf, cur));
     }
 
     protected void correctSpeed(float tpf) {
-        var dist = cur - predecessor.cur;
-        if (dist < 0) {
-            dist += FastMath.TWO_PI;
-        }
+        if (predecessor != null) {
+            var dist = cur - predecessor.cur;
+            if (dist < 0) {
+                dist += FastMath.TWO_PI;
+            }
 
-        dist *= RAD_TO_LEN;
+            dist *= RAD_TO_LEN;
 
-        // LOG.info("{}: {}", spatial.getName(), speed);
-        if (speed < maxSpeed && dist > speed * 2) {
-            speed += maxAcc * tpf;
-            if (speed > maxSpeed) {
-                speed = maxSpeed;
+            var speedDiff = speed - predecessor.speed;
+
+            // LOG.info("%s dist: %.2f".formatted(spatial.getName(), dist));
+            if (dist > speed * 2) {
+                // LOG.info("{}: {}", spatial.getName(), speed);
+                if (speed < maxSpeed) {
+                    speed += maxAcc * tpf;
+                    if (speed > maxSpeed) {
+                        speed = maxSpeed;
+                    }
+                }
+            } else {
+                if (speedDiff > 0) {
+                    speed -= maxDec * tpf;
+                    if (speed < 0) {
+                        speed = 0;
+                    }
+                }
             }
         }
-
-
-        // LOG.info("Dist: %.2f".formatted(dist));
     }
 
     @Override
@@ -72,5 +88,15 @@ public class VehicleControl extends AbstractControl {
 
     public void setPredecessor(VehicleControl predecessor) {
         this.predecessor = predecessor;
+    }
+
+    public void mark(Spatial marker) {
+        marker.setCullHint(Spatial.CullHint.Never);
+        this.marker = marker;
+    }
+
+    public void unmark(Spatial marker) {
+        marker.setCullHint(Spatial.CullHint.Always);
+        this.marker = null;
     }
 }

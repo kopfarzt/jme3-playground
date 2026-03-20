@@ -2,18 +2,27 @@ package zib.grimble.jmonkeyengine.simjam;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.collision.CollisionResults;
 import com.jme3.environment.EnvironmentCamera;
 import com.jme3.environment.FastLightProbeFactory;
 import com.jme3.environment.generation.JobProgressAdapter;
+import com.jme3.input.KeyInput;
+import com.jme3.input.MouseInput;
+import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.KeyTrigger;
+import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
+import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
+import com.jme3.scene.shape.Sphere;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.util.SkyFactory;
 import org.slf4j.Logger;
@@ -21,15 +30,14 @@ import org.slf4j.LoggerFactory;
 import zib.grimble.jme3.geometry.ParameterizedSurfaceGrid;
 import zib.grimble.jme3.geometry.psurfaces.CircularBand;
 import zib.grimble.jme3.materials.MaterialFactory;
+import zib.grimble.jme3.nodes.CoordinateAxes;
 import zib.grimble.jme3.service.DebugService;
 import zib.grimble.jme3.types.ScalingUVMap;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
-public class GameState extends BaseAppState {
+public class GameState extends BaseAppState implements ActionListener {
+    public static final String VEHICLES = "VEHICLES";
     private static final Logger LOG = LoggerFactory.getLogger(GameState.class);
     private static final List<String> CAR_MODELS = List.of(
             "Kennel/ambulance.glb",
@@ -55,10 +63,16 @@ public class GameState extends BaseAppState {
             "Kennel/van.glb"
     );
     private static final Random RAND = new Random();
+    private static final String PICK_TOGGLE = "PICK_TOGGLE";
+    private static final String COORD_AXES_TOGGLE = "COORD_AXES_TOGGLE";
     private Main app;
     private JobProgressAdapter jobProgressListener;
     private boolean postLightProbeInit;
     private Map<String, Spatial> vehicleMap = new HashMap<>();
+    private CoordinateAxes coordinateAxes;
+    private Node vehiclesNode;
+    private Spatial selectedVehicle;
+    private Spatial selectedVehicleMarker;
 
     @Override
     protected void initialize(Application app) {
@@ -73,6 +87,12 @@ public class GameState extends BaseAppState {
             postLightProbeInit = true;
         });
         this.app.camera(true);
+
+        var inputManager = app.getInputManager();
+        inputManager.addMapping(PICK_TOGGLE, new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        inputManager.addMapping(COORD_AXES_TOGGLE, new KeyTrigger(KeyInput.KEY_C));
+
+        inputManager.addListener(this, PICK_TOGGLE, COORD_AXES_TOGGLE);
     }
 
     @Override
@@ -95,6 +115,52 @@ public class GameState extends BaseAppState {
         if (postLightProbeInit) {
             postLightProbeInit = false;
             createObjects();
+        }
+    }
+
+    @Override
+    public void onAction(String name, boolean isPressed, float tpf) {
+        if (!isPressed) {
+            switch (name) {
+                case COORD_AXES_TOGGLE:
+                    LOG.info("Toggling visibiliy of coordinate axes: {}", coordinateAxes);
+                    coordinateAxes.toggleVisibility();
+                    LOG.info("Coordinate axes: {}", coordinateAxes);
+                    break;
+                case PICK_TOGGLE:
+                    var mousePos = app.getInputManager().getCursorPosition();
+
+                    var origin = app.getCamera().getWorldCoordinates(mousePos, 0f).clone();
+                    var direction = app.getCamera().getWorldCoordinates(mousePos, 1f).clone();
+                    direction.subtractLocal(origin).normalizeLocal();
+
+                    var ray = new Ray(origin, direction);
+                    var results = new CollisionResults();
+                    vehiclesNode.collideWith(ray, results);
+
+                    if (results.size() > 0) {
+                        var hit = results.getClosestCollision().getGeometry();
+                        var hitNode = hit.getParent();
+                        while (hitNode.getParent() != null && !VEHICLES.equals(hitNode.getParent().getName())) {
+                            hitNode = hitNode.getParent();
+                        }
+                        if (selectedVehicle != null) {
+                            var ctrl = selectedVehicle.getControl(VehicleControl.class);
+                            selectedVehicle = null;
+                            ctrl.unmark(selectedVehicleMarker);
+                        }
+                        selectedVehicle = hitNode;
+                        var ctrl = selectedVehicle.getControl(VehicleControl.class);
+                        ctrl.mark(selectedVehicleMarker);
+                        LOG.info("Marking Object: {}", hitNode);
+                    } else if (selectedVehicle != null) {
+                        LOG.info("Unmarking Object: {}", selectedVehicle);
+                        var ctrl = selectedVehicle.getControl(VehicleControl.class);
+                        selectedVehicle = null;
+                        ctrl.unmark(selectedVehicleMarker);
+                    }
+                    break;
+            }
         }
     }
 
@@ -190,11 +256,27 @@ public class GameState extends BaseAppState {
     }
 
     private void createObjects() {
+        coordinateAxes = DebugService.get().createCoordinateAxes(app.getAssetManager(), 3f);
+        coordinateAxes.setLocalTranslation(0, 0, 0);
+        app.getRootNode().attachChild(coordinateAxes);
+
+        var sphere = new Sphere(10, 10, 0.1f);
+        var sphereGeo = new Geometry("selectedMarker", sphere);
+        sphereGeo.setMaterial(MaterialFactory.get(app.getAssetManager()).createPlastic(ColorRGBA.Red, 0.0f));
+        app.getRootNode().attachChild(sphereGeo);
+        selectedVehicleMarker = sphereGeo;
+        selectedVehicleMarker.setCullHint(Spatial.CullHint.Always);
+
+        vehiclesNode = new Node(VEHICLES);
+        app.getRootNode().attachChild(vehiclesNode);
+
         VehicleControl first = null;
         VehicleControl last = null;
-        for (float start = 0; start < 360; start += 120) {
+        List<VehicleControl> controls = new ArrayList<>();
+        for (float start = 0; start < 360; start += 170) {
             var vehicle = createRandomVehicle();
             var control = new VehicleControl(9.75f, start, 0);
+            controls.add(control);
             if (first == null) {
                 first = control;
                 last = control;
@@ -203,9 +285,10 @@ public class GameState extends BaseAppState {
                 last = control;
             }
             vehicle.addControl(control);
-            app.getRootNode().attachChild(vehicle);
+            vehiclesNode.attachChild(vehicle);
         }
         first.setPredecessor(last);
+        LOG.info("Controls: {}", controls.size());
     }
 
     private void createSkybox() {

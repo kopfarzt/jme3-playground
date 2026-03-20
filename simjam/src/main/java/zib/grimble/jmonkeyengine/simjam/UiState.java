@@ -39,6 +39,11 @@ public class UiState extends BaseAppState {
             getStateManager().getState(GameState.class).setEnabled(true);
         });
 
+        var dummyButton = mainMenu.addChild(new Button("Dummy"));
+        dummyButton.addClickCommands(source -> {
+            LOG.info("Dummy Button");
+        });
+
         var quitButton = mainMenu.addChild(new Button("Beenden"));
         quitButton.addClickCommands(source -> app.stop());
 
