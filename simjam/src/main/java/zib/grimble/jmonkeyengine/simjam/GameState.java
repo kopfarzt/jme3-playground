@@ -2,7 +2,6 @@ package zib.grimble.jmonkeyengine.simjam;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
-import com.jme3.collision.CollisionResults;
 import com.jme3.environment.EnvironmentCamera;
 import com.jme3.environment.FastLightProbeFactory;
 import com.jme3.environment.generation.JobProgressAdapter;
@@ -15,7 +14,7 @@ import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
-import com.jme3.math.Ray;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
@@ -32,6 +31,7 @@ import zib.grimble.jme3.geometry.psurfaces.CircularBand;
 import zib.grimble.jme3.materials.MaterialFactory;
 import zib.grimble.jme3.nodes.CoordinateAxes;
 import zib.grimble.jme3.service.DebugService;
+import zib.grimble.jme3.service.HitService;
 import zib.grimble.jme3.types.ScalingUVMap;
 
 import java.util.*;
@@ -128,22 +128,8 @@ public class GameState extends BaseAppState implements ActionListener {
                     LOG.info("Coordinate axes: {}", coordinateAxes);
                     break;
                 case PICK_TOGGLE:
-                    var mousePos = app.getInputManager().getCursorPosition();
-
-                    var origin = app.getCamera().getWorldCoordinates(mousePos, 0f).clone();
-                    var direction = app.getCamera().getWorldCoordinates(mousePos, 1f).clone();
-                    direction.subtractLocal(origin).normalizeLocal();
-
-                    var ray = new Ray(origin, direction);
-                    var results = new CollisionResults();
-                    vehiclesNode.collideWith(ray, results);
-
-                    if (results.size() > 0) {
-                        var hit = results.getClosestCollision().getGeometry();
-                        var hitNode = hit.getParent();
-                        while (hitNode.getParent() != null && !VEHICLES.equals(hitNode.getParent().getName())) {
-                            hitNode = hitNode.getParent();
-                        }
+                    var hitNode = HitService.get().getHit(app.getCamera(), vehiclesNode, app.getInputManager().getCursorPosition(), new Vector2f(3, 3), true);
+                    if (hitNode != null) {
                         if (selectedVehicle != null) {
                             var ctrl = selectedVehicle.getControl(VehicleControl.class);
                             selectedVehicle = null;
@@ -219,7 +205,7 @@ public class GameState extends BaseAppState implements ActionListener {
         geometry.setMaterial(streetMaterial);
         geometry.getLocalRotation().fromAngleAxis(-90f * FastMath.DEG_TO_RAD, Vector3f.UNIT_X);
 
-        geometry.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+        geometry.setShadowMode(RenderQueue.ShadowMode.Receive);
 
         app.getRootNode().attachChild(geometry);
     }
@@ -264,6 +250,7 @@ public class GameState extends BaseAppState implements ActionListener {
         var sphereGeo = new Geometry("selectedMarker", sphere);
         sphereGeo.setMaterial(MaterialFactory.get(app.getAssetManager()).createPlastic(ColorRGBA.Red, 0.0f));
         app.getRootNode().attachChild(sphereGeo);
+        sphereGeo.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
         selectedVehicleMarker = sphereGeo;
         selectedVehicleMarker.setCullHint(Spatial.CullHint.Always);
 
