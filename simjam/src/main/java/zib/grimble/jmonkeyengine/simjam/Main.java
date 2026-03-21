@@ -44,6 +44,8 @@ public class Main extends SimpleApplication implements ActionListener {
         stateManager.attach(gameState);
         gameState.setEnabled(true);
 
+        uiState.setGameState(gameState);
+
         //flyCam.setDragToRotate(true);
     }
 

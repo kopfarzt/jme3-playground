@@ -15,6 +15,7 @@ public class VehicleControl extends AbstractControl {
     private final float radius;
     private final float LEN_TO_RAD = FastMath.DEG_TO_RAD * 0.5f;
     private final float RAD_TO_LEN = 1.0f / LEN_TO_RAD;
+    private final GameState gameState;
     private float cur = 0;
     private float speed = 0;
     private float maxAcc = 2;
@@ -25,7 +26,8 @@ public class VehicleControl extends AbstractControl {
     private VehicleControl predecessor;
     private Spatial marker;
 
-    public VehicleControl(float radius, float start, float speed) {
+    public VehicleControl(GameState gameState, float radius, float start, float speed) {
+        this.gameState = gameState;
         this.radius = radius;
         this.cur = start * FastMath.DEG_TO_RAD;
         this.speed = speed;
@@ -33,18 +35,24 @@ public class VehicleControl extends AbstractControl {
 
     @Override
     protected void controlUpdate(float tpf) {
-        correctSpeed(tpf);
-        cur = cur + speed * tpf * LEN_TO_RAD;
-        if (cur > FastMath.TWO_PI) {
-            cur -= FastMath.TWO_PI;
+        if (!gameState.isPaused()) {
+            correctSpeed(tpf);
+            cur = cur + speed * tpf * LEN_TO_RAD;
+            if (cur > FastMath.TWO_PI) {
+                cur -= FastMath.TWO_PI;
+            }
+            pos.set(radius * FastMath.cos(-cur), spatial.getLocalTranslation().y, radius * FastMath.sin(-cur));
+            if (marker != null) {
+                positionMarker();
+            }
+            spatial.setLocalTranslation(pos);
+            spatial.setLocalRotation(rotation.fromAngleAxis(cur + FastMath.PI, Vector3f.UNIT_Y));
+            //LOG.info("speed: %.2f tpf: %.2f cur: %.2f".formatted(speed, tpf, cur));
         }
-        pos.set(radius * FastMath.cos(-cur), spatial.getLocalTranslation().y, radius * FastMath.sin(-cur));
-        if (marker != null) {
-            marker.setLocalTranslation(pos.x, pos.y + 1, pos.z);
-        }
-        spatial.setLocalTranslation(pos);
-        spatial.setLocalRotation(rotation.fromAngleAxis(cur + FastMath.PI, Vector3f.UNIT_Y));
-        //LOG.info("speed: %.2f tpf: %.2f cur: %.2f".formatted(speed, tpf, cur));
+    }
+
+    private void positionMarker() {
+        marker.setLocalTranslation(pos.x, pos.y + 1, pos.z);
     }
 
     protected void correctSpeed(float tpf) {
@@ -93,6 +101,7 @@ public class VehicleControl extends AbstractControl {
     public void mark(Spatial marker) {
         marker.setCullHint(Spatial.CullHint.Never);
         this.marker = marker;
+        positionMarker();
     }
 
     public void unmark(Spatial marker) {

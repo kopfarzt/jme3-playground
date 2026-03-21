@@ -21,30 +21,5 @@
             <groupId>zib.grimble.jmonkeyengine</groupId>
             <artifactId>jme3-materials</artifactId>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.simsilica/lemur -->
-        <dependency>
-            <groupId>com.simsilica</groupId>
-            <artifactId>lemur</artifactId>
-            <version>1.16.0</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.simsilica/lemur-proto -->
-        <dependency>
-            <groupId>com.simsilica</groupId>
-            <artifactId>lemur-proto</artifactId>
-            <version>1.13.0</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.codehaus.groovy/groovy-all -->
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-            <version>3.0.25</version>
-            <type>pom</type>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.simsilica/zay-es -->
-        <dependency>
-            <groupId>com.simsilica</groupId>
-            <artifactId>zay-es</artifactId>
-            <version>1.6.0</version>
-        </dependency>
     </dependencies>
 </project>

@@ -2,21 +2,20 @@ package zib.grimble.jmonkeyengine.simjam;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
-import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
-import com.simsilica.lemur.Button;
-import com.simsilica.lemur.Container;
-import com.simsilica.lemur.GuiGlobals;
-import com.simsilica.lemur.Label;
+import com.simsilica.lemur.*;
 import com.simsilica.lemur.style.BaseStyles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import zib.grimble.jme3.ui.ObservableRangedValueModel;
 
 public class UiState extends BaseAppState {
+    public static final String CONTINUE = "Continue";
+    public static final String PAUSE = "Pause";
     private static final Logger LOG = LoggerFactory.getLogger(UiState.class);
-
     private Main app;
     private Node gui;
+    private GameState gameState;
 
     @Override
     public void initialize(Application _app) {
@@ -34,40 +33,32 @@ public class UiState extends BaseAppState {
         int screenWidth = app.getCamera().getWidth();
         int screenHeight = app.getCamera().getHeight();
 
-        int panelWidth = screenWidth / 3;
+        int panelWidth = screenWidth / 4;
         int panelHeight = screenHeight;
 
-        mainPanel.setPreferredSize(new Vector3f(panelWidth, panelHeight, 0));
+        //mainPanel.setPreferredSize(new Vector3f(panelWidth, panelHeight, 0));
 
-        mainPanel.setLocalTranslation(
-                screenWidth - panelWidth,
-                screenHeight,
-                1
-        );
 
-        var title = mainPanel.addChild(new Label("Mein Spiel"));
+        var title = mainPanel.addChild(new Label("Vehicle"));
         title.setFontSize(32);
 
-        var startButton = mainPanel.addChild(new Button("Spiel starten"));
-        startButton.addClickCommands(source -> {
-            setEnabled(false);
-            getStateManager().getState(GameState.class).setEnabled(true);
-        });
+        var speedLabel = new Label("");
+        var speedModel = new ObservableRangedValueModel(0, 100, 50);
+        speedModel.addChangeCommand(model -> LOG.info("Value: %.2f".formatted(model.getValue())));
+        var speedSlider = mainPanel.addChild(new Slider(speedModel, Axis.X));
+        // speedSlider.setPreferredSize(new Vector3f((screenWidth / 3) - 20, 40, 0));
 
-        var dummyButton = mainPanel.addChild(new Button("Dummy"));
-        dummyButton.addClickCommands(source -> {
-            LOG.info("Dummy Button");
+
+        var pauseButton = mainPanel.addChild(new Button(PAUSE));
+        pauseButton.addClickCommands(source -> {
+            gameState.setPaused(!getGameState().isPaused());
+            pauseButton.setText(gameState.isPaused() ? CONTINUE : PAUSE);
         });
 
         var quitButton = mainPanel.addChild(new Button("Beenden"));
         quitButton.addClickCommands(source -> app.stop());
 
-        // Position setzen
-        mainPanel.setLocalTranslation(
-                app.getCamera().getWidth() / 2f - 100,
-                app.getCamera().getHeight() / 2f + 100,
-                0
-        );
+        mainPanel.setLocalTranslation(screenWidth - panelWidth, screenHeight, 1);
 
         return mainPanel;
     }
@@ -92,5 +83,13 @@ public class UiState extends BaseAppState {
     protected void onDisable() {
         LOG.info("onDisable");
         app.getGuiNode().detachChild(gui);
+    }
+
+    public GameState getGameState() {
+        return gameState;
+    }
+
+    public void setGameState(GameState gameState) {
+        this.gameState = gameState;
     }
 }

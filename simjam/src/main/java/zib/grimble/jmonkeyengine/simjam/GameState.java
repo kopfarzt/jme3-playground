@@ -74,6 +74,8 @@ public class GameState extends BaseAppState implements ActionListener {
     private Spatial selectedVehicle;
     private Spatial selectedVehicleMarker;
 
+    private boolean paused = false;
+
     @Override
     protected void initialize(Application app) {
         LOG.info("initialize");
@@ -262,7 +264,7 @@ public class GameState extends BaseAppState implements ActionListener {
         List<VehicleControl> controls = new ArrayList<>();
         for (float start = 0; start < 360; start += 170) {
             var vehicle = createRandomVehicle();
-            var control = new VehicleControl(9.75f, start, 0);
+            var control = new VehicleControl(this, 9.75f, start, 0);
             controls.add(control);
             if (first == null) {
                 first = control;
@@ -301,5 +303,14 @@ public class GameState extends BaseAppState implements ActionListener {
         lightProbe.setPosition(Vector3f.ZERO);
         app.getRootNode().addLight(lightProbe);
     }
+
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public void setPaused(boolean paused) {
+        this.paused = paused;
+    }
+
 
 }
