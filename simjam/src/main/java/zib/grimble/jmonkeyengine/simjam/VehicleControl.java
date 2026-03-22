@@ -54,7 +54,7 @@ public class VehicleControl extends AbstractControl {
     }
 
     private void positionMarker() {
-        LOG.info("position mark: %s (%08x) %s".formatted(spatial, Objects.hashCode(spatial), pos));
+        //LOG.info("position mark: %s (%08x) %s".formatted(spatial, Objects.hashCode(spatial), pos));
         marker.setLocalTranslation(pos.x, pos.y + 1, pos.z);
     }
 

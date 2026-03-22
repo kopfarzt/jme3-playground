@@ -41,9 +41,7 @@ public class GameState extends BaseAppState implements ActionListener {
     private static final Logger LOG = LoggerFactory.getLogger(GameState.class);
     private static final List<String> CAR_MODELS = List.of(
             "Kennel/ambulance.glb",
-            "Kennel/delivery-flat.glb"
-    );
-    /*        ,
+            "Kennel/delivery-flat.glb",
             "Kennel/delivery.glb",
             "Kennel/firetruck.glb",
             "Kennel/garbage-truck.glb",
@@ -63,7 +61,6 @@ public class GameState extends BaseAppState implements ActionListener {
             "Kennel/truck.glb",
             "Kennel/van.glb"
     );
-    */
 
     private static final Random RAND = new Random();
     private static final String PICK_TOGGLE = "PICK_TOGGLE";
@@ -200,17 +197,17 @@ public class GameState extends BaseAppState implements ActionListener {
         LOG.info("Street: {}", DebugService.get().buffersToString(street));
 
 
-        var geometry = new Geometry("Street", street);
+        var streetGeo = new Geometry("Street", street);
 
         // var streetMaterial = MaterialFactory.get(app.getAssetManager()).createPlastic(ColorRGBA.fromRGBA255(0xC4, 0xC4, 0xC4, 0xff), 0.0f);
         var streetMaterial = app.getAssetManager().loadMaterial("materials/street.j3m");
         //streetMaterial.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
-        geometry.setMaterial(streetMaterial);
-        geometry.getLocalRotation().fromAngleAxis(-90f * FastMath.DEG_TO_RAD, Vector3f.UNIT_X);
+        streetGeo.setMaterial(streetMaterial);
+        streetGeo.getLocalRotation().fromAngleAxis(-90f * FastMath.DEG_TO_RAD, Vector3f.UNIT_X);
 
-        geometry.setShadowMode(RenderQueue.ShadowMode.Receive);
+        streetGeo.setShadowMode(RenderQueue.ShadowMode.Receive);
 
-        app.getRootNode().attachChild(geometry);
+        app.getRootNode().attachChild(streetGeo);
     }
 
     private Spatial createVehicle(String model, float scale) {
@@ -223,17 +220,18 @@ public class GameState extends BaseAppState implements ActionListener {
             spatial.depthFirstTraversal(s -> {
                 if (s instanceof Geometry geo) {
                     var name = geo.getName();
-                    LOG.info("Geometry: {} {}", name, geo.getMaterial().getParams());
+                    LOG.debug("Geometry: {} {}", name, geo.getMaterial().getParams());
                     if (name.equals("body_0")) {
-                        LOG.info("Changing material");
+                        LOG.debug("Changing material");
                         geo.getMaterial().setFloat("Roughness", 0);
                     }
-                    LOG.info("Geometry: {} {}", name, geo.getMaterial().getParams());
+                    LOG.debug("Geometry: {} {}", name, geo.getMaterial().getParams());
                 }
             });
             vehicleMap.put(model, spatial);
         } else {
             spatial = spatial.clone();
+            spatial.removeControl(VehicleControl.class);
         }
 
         return spatial;
@@ -249,12 +247,11 @@ public class GameState extends BaseAppState implements ActionListener {
         coordinateAxes.setLocalTranslation(0, 0, 0);
         app.getRootNode().attachChild(coordinateAxes);
 
-        var sphere = new Sphere(10, 10, 0.1f);
-        var sphereGeo = new Geometry("selectedMarker", sphere);
-        sphereGeo.setMaterial(MaterialFactory.get(app.getAssetManager()).createPlastic(ColorRGBA.Red, 0.0f));
-        app.getRootNode().attachChild(sphereGeo);
-        sphereGeo.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
-        selectedVehicleMarker = sphereGeo;
+        var marker = new Sphere(10, 10, 0.1f);
+        selectedVehicleMarker = new Geometry("selectedMarker", marker);
+        selectedVehicleMarker.setMaterial(MaterialFactory.get(app.getAssetManager()).createPlastic(ColorRGBA.Red, 0.0f));
+        app.getRootNode().attachChild(selectedVehicleMarker);
+        selectedVehicleMarker.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
         selectedVehicleMarker.setCullHint(Spatial.CullHint.Always);
 
         vehiclesNode = new Node(VEHICLES);
