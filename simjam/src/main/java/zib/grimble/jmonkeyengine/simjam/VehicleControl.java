@@ -10,12 +10,14 @@ import com.jme3.scene.control.AbstractControl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
+
 public class VehicleControl extends AbstractControl {
     private static final Logger LOG = LoggerFactory.getLogger(GameState.class);
     private final float radius;
     private final float LEN_TO_RAD = FastMath.DEG_TO_RAD * 0.5f;
     private final float RAD_TO_LEN = 1.0f / LEN_TO_RAD;
-    private final GameState gameState;
+    private final UiState uiState;
     private float cur = 0;
     private float speed = 0;
     private float maxAcc = 2;
@@ -26,8 +28,8 @@ public class VehicleControl extends AbstractControl {
     private VehicleControl predecessor;
     private Spatial marker;
 
-    public VehicleControl(GameState gameState, float radius, float start, float speed) {
-        this.gameState = gameState;
+    public VehicleControl(UiState uiState, float radius, float start, float speed) {
+        this.uiState = uiState;
         this.radius = radius;
         this.cur = start * FastMath.DEG_TO_RAD;
         this.speed = speed;
@@ -35,7 +37,7 @@ public class VehicleControl extends AbstractControl {
 
     @Override
     protected void controlUpdate(float tpf) {
-        if (!gameState.isPaused()) {
+        if (!uiState.isPaused()) {
             correctSpeed(tpf);
             cur = cur + speed * tpf * LEN_TO_RAD;
             if (cur > FastMath.TWO_PI) {
@@ -52,6 +54,7 @@ public class VehicleControl extends AbstractControl {
     }
 
     private void positionMarker() {
+        LOG.info("position mark: %s (%08x) %s".formatted(spatial, Objects.hashCode(spatial), pos));
         marker.setLocalTranslation(pos.x, pos.y + 1, pos.z);
     }
 
@@ -99,12 +102,14 @@ public class VehicleControl extends AbstractControl {
     }
 
     public void mark(Spatial marker) {
+        LOG.info("Mark %s (%08x)".formatted(spatial, Objects.hashCode(spatial)));
         marker.setCullHint(Spatial.CullHint.Never);
         this.marker = marker;
         positionMarker();
     }
 
     public void unmark(Spatial marker) {
+        LOG.info("Unmark %s (%08x)".formatted(spatial, Objects.hashCode(spatial)));
         marker.setCullHint(Spatial.CullHint.Always);
         this.marker = null;
     }

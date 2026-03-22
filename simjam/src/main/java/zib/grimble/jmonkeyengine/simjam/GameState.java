@@ -41,8 +41,9 @@ public class GameState extends BaseAppState implements ActionListener {
     private static final Logger LOG = LoggerFactory.getLogger(GameState.class);
     private static final List<String> CAR_MODELS = List.of(
             "Kennel/ambulance.glb",
-            "Kennel/ambulance.glb",
-            "Kennel/delivery-flat.glb",
+            "Kennel/delivery-flat.glb"
+    );
+    /*        ,
             "Kennel/delivery.glb",
             "Kennel/firetruck.glb",
             "Kennel/garbage-truck.glb",
@@ -62,6 +63,8 @@ public class GameState extends BaseAppState implements ActionListener {
             "Kennel/truck.glb",
             "Kennel/van.glb"
     );
+    */
+
     private static final Random RAND = new Random();
     private static final String PICK_TOGGLE = "PICK_TOGGLE";
     private static final String COORD_AXES_TOGGLE = "COORD_AXES_TOGGLE";
@@ -71,10 +74,8 @@ public class GameState extends BaseAppState implements ActionListener {
     private Map<String, Spatial> vehicleMap = new HashMap<>();
     private CoordinateAxes coordinateAxes;
     private Node vehiclesNode;
-    private Spatial selectedVehicle;
     private Spatial selectedVehicleMarker;
-
-    private boolean paused = false;
+    private UiState uiState;
 
     @Override
     protected void initialize(Application app) {
@@ -131,20 +132,20 @@ public class GameState extends BaseAppState implements ActionListener {
                     break;
                 case PICK_TOGGLE:
                     var hitNode = HitService.get().getHit(app.getCamera(), vehiclesNode, app.getInputManager().getCursorPosition(), new Vector2f(3, 3), true);
+                    var selectedVehicle = uiState.getSelectedVehicle();
                     if (hitNode != null) {
                         if (selectedVehicle != null) {
                             var ctrl = selectedVehicle.getControl(VehicleControl.class);
-                            selectedVehicle = null;
+                            uiState.setSelectedVehicle(null);
                             ctrl.unmark(selectedVehicleMarker);
                         }
-                        selectedVehicle = hitNode;
-                        var ctrl = selectedVehicle.getControl(VehicleControl.class);
+                        uiState.setSelectedVehicle(hitNode);
+                        var ctrl = hitNode.getControl(VehicleControl.class);
                         ctrl.mark(selectedVehicleMarker);
-                        LOG.info("Marking Object: {}", hitNode);
                     } else if (selectedVehicle != null) {
                         LOG.info("Unmarking Object: {}", selectedVehicle);
                         var ctrl = selectedVehicle.getControl(VehicleControl.class);
-                        selectedVehicle = null;
+                        uiState.setSelectedVehicle(null);
                         ctrl.unmark(selectedVehicleMarker);
                     }
                     break;
@@ -264,7 +265,7 @@ public class GameState extends BaseAppState implements ActionListener {
         List<VehicleControl> controls = new ArrayList<>();
         for (float start = 0; start < 360; start += 170) {
             var vehicle = createRandomVehicle();
-            var control = new VehicleControl(this, 9.75f, start, 0);
+            var control = new VehicleControl(uiState, 9.75f, start, 0);
             controls.add(control);
             if (first == null) {
                 first = control;
@@ -304,13 +305,11 @@ public class GameState extends BaseAppState implements ActionListener {
         app.getRootNode().addLight(lightProbe);
     }
 
-    public boolean isPaused() {
-        return paused;
+    public UiState getUiState() {
+        return uiState;
     }
 
-    public void setPaused(boolean paused) {
-        this.paused = paused;
+    public void setUiState(UiState uiState) {
+        this.uiState = uiState;
     }
-
-
 }
