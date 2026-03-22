@@ -21,11 +21,13 @@ public class UiState extends BaseAppState {
     private Main app;
     private Node gui;
     private GameState gameState;
+    private Label title;
     private ObservableRangedValueModel speedModel;
     private ObservableRangedValueModel accModel;
     private ObservableRangedValueModel decModel;
     private boolean paused = false;
     private Spatial selectedVehicle;
+    private Slider speedSlider;
 
     @Override
     public void initialize(Application _app) {
@@ -50,13 +52,19 @@ public class UiState extends BaseAppState {
         mainPanel.setLayout(new SpringGridLayout(Axis.Y, Axis.X, FillMode.None, FillMode.Even));
         //mainPanel.setInsets(new Insets3f(15, 15, 15, 15));
 
-        var title = mainPanel.addChild(new Label("Vehicle"));
+        title = mainPanel.addChild(new Label("Vehicle"));
         title.setFontSize(32);
 
         var speedLabel = mainPanel.addChild(new Label("Speed"));
         speedModel = new ObservableRangedValueModel(0, 100, 50);
-        speedModel.addChangeCommand(model -> LOG.info("Value: %.2f".formatted(model.getValue())));
-        var speedSlider = mainPanel.addChild(new Slider(speedModel, Axis.X));
+        speedModel.addChangeCommand(model -> {
+            if (selectedVehicle != null) {
+                var ctrl = selectedVehicle.getControl(VehicleControl.class);
+                ctrl.setMaxSpeed((float) model.getValue());
+            }
+            LOG.info("Value: %.2f".formatted(model.getValue()));
+        });
+        speedSlider = mainPanel.addChild(new Slider(speedModel, Axis.X));
 
         var accLabel = mainPanel.addChild(new Label("Acc"));
         accModel = new ObservableRangedValueModel(0, 10, 5);
@@ -65,7 +73,9 @@ public class UiState extends BaseAppState {
 
         var decLabel = mainPanel.addChild(new Label("Dec"));
         decModel = new ObservableRangedValueModel(0, 20, 10);
-        decModel.addChangeCommand(model -> LOG.info("Value: %.2f".formatted(model.getValue())));
+        decModel.addChangeCommand(model -> {
+            LOG.info("Value: %.2f".formatted(model.getValue()));
+        });
         var decSlider = mainPanel.addChild(new Slider(decModel, Axis.X));
         // speedSlider.setPreferredSize(new Vector3f((screenWidth / 3) - 20, 40, 0));
 
@@ -81,6 +91,7 @@ public class UiState extends BaseAppState {
 
         mainPanel.setLocalTranslation(screenWidth - panelWidth, screenHeight, 1);
 
+
         return mainPanel;
     }
 
@@ -94,6 +105,7 @@ public class UiState extends BaseAppState {
 
         if (gui == null) {
             gui = initializeGui();
+            setSelectedVehicle(null);
         }
 
         app.getGuiNode().attachChild(gui);
@@ -121,5 +133,19 @@ public class UiState extends BaseAppState {
     public void setSelectedVehicle(Spatial selectedVehicle) {
         LOG.info("selected vehicle: %s (%08x)".formatted(selectedVehicle, Objects.hashCode(selectedVehicle)));
         this.selectedVehicle = selectedVehicle;
+        updateGui();
+    }
+
+    public void updateGui() {
+        if (selectedVehicle != null) {
+            var ctrl = selectedVehicle.getControl(VehicleControl.class);
+            title.setText(selectedVehicle.getName());
+            speedModel.setValue(ctrl.getMaxSpeed());
+            speedSlider.setCullHint(Spatial.CullHint.Never);
+        } else {
+            title.setText("No selection");
+            speedSlider.setCullHint(Spatial.CullHint.Always);
+
+        }
     }
 }

@@ -27,12 +27,35 @@ public class VehicleControl extends AbstractControl {
     private Quaternion rotation = new Quaternion();
     private VehicleControl predecessor;
     private Spatial marker;
-
     public VehicleControl(UiState uiState, float radius, float start, float speed) {
         this.uiState = uiState;
         this.radius = radius;
         this.cur = start * FastMath.DEG_TO_RAD;
         this.speed = speed;
+    }
+
+    public float getMaxAcc() {
+        return maxAcc;
+    }
+
+    public void setMaxAcc(float maxAcc) {
+        this.maxAcc = maxAcc;
+    }
+
+    public float getMaxDec() {
+        return maxDec;
+    }
+
+    public void setMaxDec(float maxDec) {
+        this.maxDec = maxDec;
+    }
+
+    public float getMaxSpeed() {
+        return maxSpeed;
+    }
+
+    public void setMaxSpeed(float maxSpeed) {
+        this.maxSpeed = maxSpeed;
     }
 
     @Override
