@@ -260,7 +260,7 @@ public class GameState extends BaseAppState implements ActionListener {
         VehicleControl first = null;
         VehicleControl last = null;
         List<VehicleControl> controls = new ArrayList<>();
-        for (float start = 0; start < 360; start += 170) {
+        for (float start = 0; start < 360; start += 20) {
             var vehicle = createRandomVehicle();
             var control = new VehicleControl(uiState, 9.75f, start, 0);
             controls.add(control);
@@ -268,13 +268,13 @@ public class GameState extends BaseAppState implements ActionListener {
                 first = control;
                 last = control;
             } else {
-                control.setPredecessor(last);
+                last.setPredecessor(control);
                 last = control;
             }
             vehicle.addControl(control);
             vehiclesNode.attachChild(vehicle);
         }
-        first.setPredecessor(last);
+        last.setPredecessor(first);
         LOG.info("Controls: {}", controls.size());
     }
 
