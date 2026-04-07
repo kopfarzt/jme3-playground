@@ -153,8 +153,8 @@ public class GameState extends BaseAppState implements ActionListener {
     private void initCamera() {
         app.getFlyByCamera().setZoomSpeed(10);
         app.getFlyByCamera().setMoveSpeed(2);
-        app.getCamera().setLocation(new Vector3f(0, 8, 20));
-        app.getCamera().lookAt(new Vector3f(0, 2, 0), Vector3f.UNIT_Y);
+        app.getCamera().setLocation(new Vector3f(0, 16, 30));
+        app.getCamera().lookAt(new Vector3f(0, 0, 6), Vector3f.UNIT_Y);
     }
 
     private void createLightsAndShadows() {
@@ -189,9 +189,9 @@ public class GameState extends BaseAppState implements ActionListener {
 
     private void createStreet() {
         var street = new ParameterizedSurfaceGrid(
-                new CircularBand(9f, 10f),
-                new ScalingUVMap(20f, 1f),
-                100, 3,
+                new CircularBand(16.5f, 17f),
+                new ScalingUVMap(60f, 1f),
+                300, 1,
                 true, false);
 
         LOG.info("Street: {}", DebugService.get().buffersToString(street));
@@ -239,7 +239,7 @@ public class GameState extends BaseAppState implements ActionListener {
 
     private Spatial createRandomVehicle() {
         var model = CAR_MODELS.get(RAND.nextInt(CAR_MODELS.size()));
-        return createVehicle(model, 0.2f);
+        return createVehicle(model, 0.1f);
     }
 
     private void createObjects() {
@@ -260,9 +260,9 @@ public class GameState extends BaseAppState implements ActionListener {
         VehicleControl first = null;
         VehicleControl last = null;
         List<VehicleControl> controls = new ArrayList<>();
-        for (float start = 0; start < 360; start += 20) {
+        for (float start = 0; start < 360; start += 7) {
             var vehicle = createRandomVehicle();
-            var control = new VehicleControl(uiState, 9.75f, start, 0);
+            var control = new VehicleControl(uiState, 16.875f, start, 0);
             controls.add(control);
             if (first == null) {
                 first = control;

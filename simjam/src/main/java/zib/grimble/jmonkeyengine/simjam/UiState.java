@@ -107,7 +107,7 @@ public class UiState extends BaseAppState {
         insertButton.addClickCommands(source -> {
             LOG.info("Insert vehicle {}.", selectedVehicle);
         });
-        var pauseButton = mainPanel.addChild(new Button(PAUSE));
+        var pauseButton = mainPanel.addChild(new Button(paused ? CONTINUE : PAUSE));
         pauseButton.addClickCommands(source -> {
             paused = !paused;
             pauseButton.setText(paused ? CONTINUE : PAUSE);
@@ -141,7 +141,8 @@ public class UiState extends BaseAppState {
 
     @Override
     protected void onEnable() {
-        LOG.info("onEnable");
+        setPaused(true);
+        LOG.info("onEnable start");
 
         if (gui == null) {
             gui = initializeGui();
@@ -150,6 +151,7 @@ public class UiState extends BaseAppState {
 
         app.getGuiNode().attachChild(gui);
         app.camera(false);
+        LOG.info("onEnable end");
     }
 
     @Override

@@ -11,9 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
+import java.util.Random;
 
 public class VehicleControl extends AbstractControl {
     private static final Logger LOG = LoggerFactory.getLogger(GameState.class);
+    private static final Random RND = new Random();
     private final float radius;
     private final float LEN_TO_RAD = FastMath.DEG_TO_RAD * 0.5f;
     private final float RAD_TO_LEN = 1.0f / LEN_TO_RAD;
@@ -33,6 +35,9 @@ public class VehicleControl extends AbstractControl {
         this.radius = radius;
         this.cur = start * FastMath.DEG_TO_RAD;
         this.speed = speed;
+        maxSpeed = maxSpeed * RND.nextFloat(0.5f, 1.5f);
+        maxAcc = maxAcc * RND.nextFloat(0.5f, 1.5f);
+        maxDec = maxDec * RND.nextFloat(0.5f, 1.5f);
     }
 
     public float getMaxAcc() {
@@ -62,7 +67,13 @@ public class VehicleControl extends AbstractControl {
     @Override
     protected void controlUpdate(float tpf) {
         if (!uiState.isPaused()) {
+            var remMaxSpeed = maxSpeed;
+            // Fixed tempo-limit on a segment.
+            if (cur > 0 && cur < FastMath.PI * 0.1) {
+                maxSpeed = maxSpeed / 2;
+            }
             correctSpeed(tpf);
+            maxSpeed = remMaxSpeed;
             cur = cur + speed * tpf * LEN_TO_RAD;
             if (cur > FastMath.TWO_PI) {
                 cur -= FastMath.TWO_PI;
@@ -94,7 +105,7 @@ public class VehicleControl extends AbstractControl {
             var speedDiff = speed - predecessor.speed;
 
             // LOG.info("%s dist: %.2f".formatted(spatial.getName(), dist));
-            if (dist > speed * 2) {
+            if (dist > speed * 1) {
                 // LOG.info("{}: {}", spatial.getName(), speed);
                 if (speed < maxSpeed) {
                     speed += maxAcc * tpf;
